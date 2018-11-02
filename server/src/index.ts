@@ -10,6 +10,7 @@ import { Campaign } from './models/Campaign';
 import { indexOfMessageSearch } from './helpers/messageSender.helper';
 import path from 'path';
 import { startup } from './helpers/startup.helper';
+import { Preference } from './models/Preference';
 const password = process.env.ADMIN_PASSWORD || 'test';
 const secret = 'test';
 
@@ -27,10 +28,32 @@ app.use(cors({
 
 app.use('/', express.static('public'));
 
-app.post('/smsresponse', (req: Request, res: Response) => {
+// TODO: create twilio delivery status update handler
+app.post('/deliveryupdate', (req, res, next) => {
+
+});
+
+// TODO: attach twilio security middleware
+app.post('/smsresponse', async (req: Request, res: Response) => {
   debugger;
   console.log("Received response", req.body);
   const user_identifier = req.body.From;
+
+  const response = req.body.toLowercase();
+  switch (response){
+    case 'stop':
+      // They want to opt out
+      const preference = await Preference.findOne({
+        contact_method: req.body.From
+      });
+      preference.opt_out = true;
+      preference.save();
+      res.status(200).send();
+      return;
+
+    case 'help':
+      // TODO:Send basic help message
+  }
   Delivery.findOne({user: user_identifier}).sort({date: -1}).limit(1)
     .then(async(delivery) => {
       console.log("Found delivery by user", delivery);
@@ -44,13 +67,15 @@ app.post('/smsresponse', (req: Request, res: Response) => {
         date: Date.now()
       });
       console.log(campaign.messages);
-      return campaign.save();
+      campaign.save();
+      res.status(200).send();
     })
     .catch(error => {
       res.status(500).send("Failed to handle response");
     });
 });
 
+// TODO: Actually compare against salted+hashed pwd in database
 app.post('/api/login', (req: Request, res: Response) => {
   console.log(req);
   if (req.body.password == password) {
