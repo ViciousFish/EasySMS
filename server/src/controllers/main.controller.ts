@@ -25,7 +25,7 @@ export default class Main extends BaseController {
                     message: "campaign not found"
                 });
             } else {
-                req.campaign = campaign;
+                res.locals.campaign = campaign;
                 next();
             }
         });
@@ -78,7 +78,7 @@ export default class Main extends BaseController {
     }
 
     async responseReport(req: Request, res: Response, next: any): Promise<void> {
-        const campaign = req.campaign;
+        const { campaign } = res.locals;
         const responses = [];
         for (const message of campaign.messages) {
             for (const response of message.responses) {
@@ -143,7 +143,7 @@ export default class Main extends BaseController {
 
     async startCampaign(req: Request, res: Response, next: any): Promise<void> {
 
-        const campaign = req.campaign;
+        const { campaign } = res.locals;
 
         if (campaign.status != 'created') {
             let msg: string;
@@ -196,7 +196,7 @@ export default class Main extends BaseController {
         };
 
 
-        const campaign = req.campaign;
+        const { campaign } = res.locals;
         
         campaign.messages.push(newMessage);
         campaign.save()
@@ -208,7 +208,7 @@ export default class Main extends BaseController {
         let campaignId = req.params.campaignId;
         let messageId = req.params.messageId;
 
-        const campaign = req.campaign;
+        const { campaign } = res.locals;
 
         let msgToUpdate = campaign.messages.find((element: IMessage) => element.uuid == messageId);
         if (!msgToUpdate){
@@ -229,7 +229,7 @@ export default class Main extends BaseController {
     async getMessage(req: Request, res: Response, next: any): Promise<void> {
         let msgId = req.params.id;
         let message: IMessage;
-        const campaign = req.campaign;
+        const { campaign } = res.locals;
         let index: number = await indexOfMessageSearch(campaign.messages, msgId)
         if (index == -1){
             this.handleError(next, "Message not found", {})
