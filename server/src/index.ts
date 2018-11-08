@@ -52,20 +52,6 @@ app.post('/smsresponse', async (req: Request, res: Response) => {
   const user_identifier = req.body.From;
 
   const response = req.body.toLowercase();
-  switch (response){
-    case 'stop':
-      // They want to opt out
-      const preference = await Preference.findOne({
-        contact_method: req.body.From
-      });
-      preference.opt_out = true;
-      preference.save();
-      res.status(200).send();
-      return;
-
-    case 'help':
-      // TODO:Send basic help message
-  }
   Delivery.findOne({user: user_identifier}).sort({date: -1}).limit(1)
     .then(async(delivery) => {
       console.log("Found delivery by user", delivery);
