@@ -17,31 +17,6 @@ export async function startSendingMessage(campaign_id: string, message_id: strin
   campaign.messages[messageIndex].status = 'started';
   await campaign.save();
   campaign.users.map(user => {
-    if (user.email) {
-      // Send message via email dispatcher
-      // new EmailDispatcher().sendMessage(campaign, message, user.email)
-      //   .then(()=>{
-      //     const delivery = new Delivery({
-      //       campaign_id,
-      //       user: user.email,
-      //       message: message.text,
-      //       date: new Date(),
-      //       status: 'Success'
-      //     });
-      //     delivery.save();
-      //   })
-      //   .catch(()=>{
-      //     const delivery = new Delivery({
-      //       campaign_id,
-      //       user: user.email,
-      //       message: message.text,
-      //       date: new Date(),
-      //       status: 'Failed!'
-      //     });
-      //     delivery.save();
-      //   });
-
-    }
     if (user.phone) {
       // Send message via phone dispatcher
       new TwilioDispatcher().sendMessage(campaign, message, user.phone)
@@ -56,16 +31,8 @@ export async function startSendingMessage(campaign_id: string, message_id: strin
           });
           delivery.save();
         })
-        .catch(() => {
-          const delivery = new Delivery({
-            campaign,
-            user: user.phone,
-            message: message.uuid,
-            messageBody: message.text,
-            date: new Date(),
-            status: 'Failed!'
-          });
-          delivery.save();
+        .catch((err: any) => {
+          console.error("An error happened while sending a message", message);
         });
     }
   });
@@ -93,35 +60,8 @@ export async function resumeSendingMessage(campaign_id: string, message_id: stri
   let message = messages[index];
 
   campaign.users.forEach(user => {
-    if (user.email) {
-      if (!deliveries[user.email]) {
-        // Send message via email dispatcher
-        // new EmailDispatcher().sendMessage(campaign, message, user.email)
-        //   .then(()=>{
-        //     const delivery = new Delivery({
-        //       campaign_id,
-        //       user: user.email,
-        //       message: message.text,
-        //       date: new Date(),
-        //       status: 'Success'
-        //     });
-        //     delivery.save();
-        //   })
-        //   .catch(()=>{
-        //     const delivery = new Delivery({
-        //       campaign_id,
-        //       user: user.email,
-        //       message: message.text,
-        //       date: new Date(),
-        //       status: 'Failed!'
-        //     });
-        //     delivery.save();
-        //   });
-      }
-    }
     if (user.phone) {
       if (!deliveries[user.phone]) {
-        // Send message via phone dispatcher
         new TwilioDispatcher().sendMessage(campaign, message, user.email)
           .then(() => {
             const delivery = new Delivery({
@@ -134,16 +74,8 @@ export async function resumeSendingMessage(campaign_id: string, message_id: stri
             });
             delivery.save();
           })
-          .catch(() => {
-            const delivery = new Delivery({
-              campaign,
-              user: user.phone,
-              message: message.uuid,
-              messageBody: message.text,
-              date: new Date(),
-              status: 'Failed!'
-            });
-            delivery.save();
+          .catch((err: any) => {
+            console.error("An error happened while sending a message", message);
           });
       }
     }

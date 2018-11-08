@@ -36,7 +36,7 @@ export default class Main extends BaseController {
         this.router.get('/campaigns', this.getCampaigns.bind(this));
         this.router.get('/campaign/:campaign_id/message/:messageId', this.getMessage.bind(this));
         this.router.put('/campaign/:campaign_id/message/:messageId', this.updateMessage.bind(this));
-        this.router.post('/campagn/:campaign_id/message', this.createMessage.bind(this));
+        this.router.post('/campaign/:campaign_id/message', this.createMessage.bind(this));
         this.router.get('/campaign/:campaign_id/responses', this.responseReport.bind(this));
         this.router.get('/campaign/:id/deliveries', this.deliveryReport.bind(this));
     };
@@ -98,7 +98,7 @@ export default class Main extends BaseController {
         const items = responses;
         const replacer = (key: string, value: any) => value === null ? '' : value // specify how you want to handle null values here
         const header = Object.keys(items[0])
-        let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
+        let csv = items.map((row: any) => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
         csv.unshift(header.join(','))
         const csvString = csv.join('\r\n')
 
@@ -138,7 +138,7 @@ export default class Main extends BaseController {
     }
 
     async getCampaign(req: Request, res: Response, next: any): Promise<void> {
-        this.sendResponse(res, req.campaign.toClient());
+        this.sendResponse(res, res.locals.campaign.toClient());
     }
 
     async startCampaign(req: Request, res: Response, next: any): Promise<void> {

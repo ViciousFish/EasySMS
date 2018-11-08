@@ -1,3 +1,12 @@
+import path from 'path';
+import dotenv from 'dotenv';
+if (process.env.RUN_MODE === 'local'){
+  const result = dotenv.config({path: path.resolve(__dirname, "../.env")});
+  if (result.error){
+    throw result.error;
+  }
+}
+
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
@@ -8,9 +17,12 @@ import helpers from './helpers';
 import { Delivery } from './models/Delivery';
 import { Campaign } from './models/Campaign';
 import { indexOfMessageSearch } from './helpers/messageSender.helper';
-import path from 'path';
 import { startup } from './helpers/startup.helper';
 import { Preference } from './models/Preference';
+
+
+
+
 const password = process.env.ADMIN_PASSWORD || 'test';
 const secret = 'test';
 
