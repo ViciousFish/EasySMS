@@ -19,6 +19,7 @@ import { Campaign } from './models/Campaign';
 import { indexOfMessageSearch } from './helpers/messageSender.helper';
 import { startup } from './helpers/startup.helper';
 import { Preference } from './models/Preference';
+import twilio from 'twilio';
 
 
 
@@ -40,13 +41,15 @@ app.use(cors({
 
 app.use('/', express.static('public'));
 
-// TODO: create twilio delivery status update handler
-app.post('/deliveryupdate', (req, res, next) => {
+const twilioWebhookMiddleware = process.env.RUN_MODE === 'local' ? (_: any, __: any, next: any) => {next()} : twilio.webhook();
 
+// TODO: create twilio delivery status update handler
+app.post('/deliveryupdate', twilioWebhookMiddleware, (req, res, next) => {
+  res.status(200).send();
 });
 
 // TODO: attach twilio security middleware
-app.post('/smsresponse', async (req: Request, res: Response) => {
+app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Response) => {
   debugger;
   console.log("Received response", req.body);
   const user_identifier = req.body.From;
