@@ -8,8 +8,7 @@ FROM node:alpine
 
 WORKDIR /server
 
-COPY ./server/package.json .
-COPY ./server/package-lock.json .
+COPY ./server/package.json ./server/package-lock.json ./
 
 RUN npm i
 

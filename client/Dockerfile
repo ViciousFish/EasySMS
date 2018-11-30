@@ -1,11 +1,10 @@
-FROM node
+FROM node:alpine
 
 WORKDIR /client
 
-COPY package.json .
-COPY package-lock.json .
+COPY package.json package-lock.json ./
 
-RUN npm ci
+RUN npm i
 
 COPY . .
 

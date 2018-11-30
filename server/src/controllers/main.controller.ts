@@ -2,7 +2,6 @@ import BaseController from './base.controller';
 import { Campaign, IUser, IMessage, ICampaign, IResponse } from '../models/Campaign';
 import { indexOfMessageSearch } from '../helpers/messageSender.helper';
 import express, { Router, Request, Response, Application } from 'express';
-import { debug } from 'util';
 import { Delivery } from '../models/Delivery';
 import { MessageScheduler } from '../helpers/messageScheduler.helper';
 
@@ -11,12 +10,7 @@ export default class Main extends BaseController {
     constructor(app: Express.Application) {
         super(app);
 
-        this.router.param('campaign_id', async (req, res, next) => {
-            // validate campaign_id
-            // get campaign by id
-            // add it to the req object
-            //next
-
+        this.router.param('campaign_id', async (req: Request, res: Response, next: any) => {
             const campaign = await Campaign.findById(req.params.campaign_id);
 
             if (campaign == null){
@@ -67,8 +61,6 @@ export default class Main extends BaseController {
             csv.unshift(header.join(','))
             const csvString = csv.join('\r\n')
 
-            console.log(csvString);
-
             res.header("Content-type", "application/csv");
             res.header("Content-disposition", `attachment; filename=${campaign_id}.deliveryreport.csv`);
             res.send(csvString).status(200);
@@ -101,8 +93,6 @@ export default class Main extends BaseController {
         let csv = items.map((row: any) => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
         csv.unshift(header.join(','))
         const csvString = csv.join('\r\n')
-
-        console.log(csvString);
 
         res.header("Content-type", "application/csv");
         res.header("Content-disposition", `attachment; filename=${campaign.id}.responsereport.csv`);

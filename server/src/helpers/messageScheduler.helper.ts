@@ -8,13 +8,11 @@ export class MessageScheduler {
 
   static startCampaign(campaign: ICampaign): void {
     campaign.messages.forEach(message => {
-      console.log("Message:", message);
       this.scheduleMessage(campaign._id, message.uuid, message.date);
     });
   }
 
   static scheduleMessage(campaign_id: string, message_id: string, date: number): void {
-    console.log("Created message timeout!", date - Date.now());
     const timeout = setTimeout(
       () => startSendingMessage(campaign_id, message_id),
       date - Date.now()

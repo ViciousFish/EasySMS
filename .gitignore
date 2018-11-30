@@ -73,5 +73,6 @@ typings/
 .serverless
 
 server/dist
+server/public
 
 \.DS_Store

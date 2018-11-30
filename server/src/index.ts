@@ -15,17 +15,19 @@ import dispatcher from './dispatcher';
 import mongoose from 'mongoose';
 import helpers from './helpers';
 import { Delivery } from './models/Delivery';
-import { Campaign } from './models/Campaign';
+import { Campaign, IUser } from './models/Campaign';
 import { indexOfMessageSearch } from './helpers/messageSender.helper';
 import { startup } from './helpers/startup.helper';
 import { Preference } from './models/Preference';
 import twilio from 'twilio';
+import bcrypt from 'bcryptjs';
+import { AuthenticationUser, IAuthenticationUser } from './models/AuthenticationUser';
+import session from 'express-session';
+import morgan from 'morgan';
 
+const MongoStore = require('connect-mongo')(session);
 
-
-
-const password = process.env.ADMIN_PASSWORD || 'test';
-const secret = 'test';
+const secret = process.env.SESSION_SECRET || 'test';
 
 const mongoUrl = process.env.MONGO_URL || 'mongodb://mongo/ohack'
 mongoose.connect(mongoUrl);
@@ -38,6 +40,39 @@ app.use(cookieParser());
 app.use(cors({
   origin: true
 }))
+app.use(morgan('combined'));
+
+app.use(session({
+  name: 'user_sid',
+  secret,
+  store: new MongoStore({
+    url: mongoUrl
+  }),
+  resave: false,
+  saveUninitialized: false
+}));
+
+// This middleware will check if user's cookie is still saved in browser and user is not set, then automatically log the user out.
+// This usually happens when you stop your express server after login, your cookie still remains saved in the browser.
+app.use((req: Request, res: Response, next) => {
+  // @ts-ignore
+  if (req.cookies.user_sid && !req.session.user) {
+      res.clearCookie('user_sid');        
+  }
+  next();
+});
+
+// middleware function to check for logged-in users
+var sessionChecker = (req: Request, res: Response, next: any) => {
+  // @ts-ignore
+  if (req.session.user && req.cookies.user_sid) {
+      res.redirect('/dashboard');
+  } else {
+      next();
+  }    
+};
+
+
 
 app.use('/', express.static('public'));
 
@@ -51,23 +86,18 @@ app.post('/deliveryupdate', twilioWebhookMiddleware, (req, res, next) => {
 // TODO: attach twilio security middleware
 app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Response) => {
   debugger;
-  console.log("Received response", req.body);
   const user_identifier = req.body.From;
 
   const response = req.body.toLowercase();
   Delivery.findOne({user: user_identifier}).sort({date: -1}).limit(1)
     .then(async(delivery) => {
-      console.log("Found delivery by user", delivery);
       const campaign = await Campaign.findById(delivery.campaign);
-      console.log("Found the campaign");
       const index = await indexOfMessageSearch(campaign.messages, delivery.message);
-      console.log("Found the index of the message", campaign, index);
       campaign.messages[index].responses.push({
         user: user_identifier,
         text: req.body.Body,
         date: Date.now()
       });
-      console.log(campaign.messages);
       campaign.save();
       res.status(200).send();
     })
@@ -76,33 +106,93 @@ app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Resp
     });
 });
 
-// TODO: Actually compare against salted+hashed pwd in database
-app.post('/api/login', (req: Request, res: Response) => {
-  console.log(req);
-  if (req.body.password == password) {
-    res.cookie('authorization', secret, {
-    });
-    res.sendStatus(201);
-  } else {
-    res.sendStatus(401);
+app.post('/api/login', (req: Request, res: Response, next) => {
+  const { phoneNumber, password } = req.body;
+  
+  // Validate phone number format
+  if (!phoneNumber || typeof phoneNumber !== 'string' || !/\d{10}/.test(phoneNumber)) {
+    // Invalid phone number
+    res.status(400).send("Bad phone number");
+    return;
   }
+
+  AuthenticationUser.findOne({ phoneNumber }).then((user: IAuthenticationUser) => {
+    if (!user){
+      throw 'No user found';
+    }
+    
+    if (bcrypt.compareSync(password, user.password)){
+      // @ts-ignore
+      req.session.user = user.phoneNumber;
+    } else {
+      throw 'Bad password';
+    }
+  }).catch((error) => {
+    if (error === 'No user found' || 'Bad password'){
+      res.status(403).send("Invalid phone number or password");
+      return;
+    } else {
+      res.status(500).send("Something went wrong");
+    }
+  });
 });
 
-// app.use((req: Request, res: Response, next) => {
-//   if (req.headers.authorization == secret || req.cookies.authorization == secret) {
-//     next();
-//   } else {
-//     res.sendStatus(401);
-//   }
-// });
+app.post('/changePassword', sessionChecker, (req: Request, res: Response, next: any) => {
+  const { phoneNumber, password, newPassword } = req.body;
 
-app.get('/testing', (req: Request, res: Response) => {
-  res.send("Hello, josh!").status(200);
-  dispatcher.sms.sendMessage("Hello!!!", { phoneNumber: "+12092757002" })
+  // Validate phone number format
+  if (!phoneNumber || typeof phoneNumber !== 'string' || !/\d{10}/.test(phoneNumber)) {
+    // Invalid phone number
+    res.status(400).send("Bad phone number");
+    return;
+  }
+
+  if (!password || !newPassword) {
+    // Missing passwords
+    res.status(400).send("Need passwords");
+    return;
+  }
+  
+  AuthenticationUser.findOne({ phoneNumber }).then((user: IAuthenticationUser) => {
+    if (!user){
+      throw 'No user found';
+    }
+    
+    if (bcrypt.compareSync(password, user.password)){
+
+
+      const salt = bcrypt.genSaltSync(12);
+      const hash = bcrypt.hashSync(newPassword, salt);
+      user.password = hash;
+      user.save()
+        .then(() => {
+          // @ts-ignore
+          if (req.session.user && req.cookies.user_sid) {
+            res.clearCookie('user_sid');
+          }
+          res.status(201).send("Password successfully changed");
+          return;
+        })
+        .catch((error) => {
+          console.error("Error saving user password! Log omitted for security");
+          res.status(500).send("Something went wrong");
+          return;
+        });
+    } else {
+      throw 'Bad password';
+    }
+  }).catch((error) => {
+    if (error === 'No user found' || 'Bad password'){
+      res.status(403).send("Invalid phone number or password");
+      return;
+    } else {
+      res.status(500).send("Something went wrong");
+    }
+  });
 });
 
 try {
-  helpers.routing(app);
+  helpers.routing(app, sessionChecker);
 
   app.use('/*', (req, res, next) => {
     res.status(200).sendFile(path.resolve(__dirname + '../../public/index.html'));
