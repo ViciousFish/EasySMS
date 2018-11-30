@@ -11,14 +11,33 @@ export default class Main extends BaseController {
     constructor(app: Express.Application) {
         super(app);
 
+        this.router.param('campaign_id', async (req, res, next) => {
+            // validate campaign_id
+            // get campaign by id
+            // add it to the req object
+            //next
+
+            const campaign = await Campaign.findById(req.params.campaign_id);
+
+            if (campaign == null){
+                next({
+                    status: 404,
+                    message: "campaign not found"
+                });
+            } else {
+                res.locals.campaign = campaign;
+                next();
+            }
+        });
+
         this.router.post('/campaign', this.createCampaign.bind(this));
-        this.router.get('/campaign/:id', this.getCampaign.bind(this));
-        this.router.post('/campaign/:id/start', this.startCampaign.bind(this));
+        this.router.get('/campaign/:campaign_id', this.getCampaign.bind(this));
+        this.router.post('/campaign/:campaign_id/start', this.startCampaign.bind(this));
         this.router.get('/campaigns', this.getCampaigns.bind(this));
-        this.router.get('/campaign/:campaignId/message/:messageId', this.getMessage.bind(this));
-        this.router.put('/campaign/:campaignId/message/:messageId', this.updateMessage.bind(this));
-        this.router.post('/message', this.createMessage.bind(this));
-        this.router.get('/campaign/:id/responses', this.responseReport.bind(this));
+        this.router.get('/campaign/:campaign_id/message/:messageId', this.getMessage.bind(this));
+        this.router.put('/campaign/:campaign_id/message/:messageId', this.updateMessage.bind(this));
+        this.router.post('/campaign/:campaign_id/message', this.createMessage.bind(this));
+        this.router.get('/campaign/:campaign_id/responses', this.responseReport.bind(this));
         this.router.get('/campaign/:id/deliveries', this.deliveryReport.bind(this));
     };
 
@@ -59,50 +78,35 @@ export default class Main extends BaseController {
     }
 
     async responseReport(req: Request, res: Response, next: any): Promise<void> {
-        const campaignId = req.params.id;
-        if (!campaignId) {
-            //send error
-            this.handleError(next, "No campaign id found", "Error");
+        const { campaign } = res.locals;
+        const responses = [];
+        for (const message of campaign.messages) {
+            for (const response of message.responses) {
+                responses.push({
+                    user: response.user,
+                    campaign: campaign.id,
+                    date: response.date,
+                    message: message.text,
+                    response: response.text
+                })
+            }
+        }
+        if (responses == null || responses.length == 0) {
+            this.handleError(next, "No responses to report!", "Error");
             return;
         }
-        Campaign.findById(campaignId)
-            .then(async campaign => {
-                console.log("Found campaign", campaign);
-                const responses = [];
-                for (const message of campaign.messages) {
-                    for (const response of message.responses) {
-                        responses.push({
-                            user: response.user,
-                            campaign: campaign.id,
-                            date: response.date,
-                            message: message.text,
-                            response: response.text
-                        })
-                    }
-                }
+        const items = responses;
+        const replacer = (key: string, value: any) => value === null ? '' : value // specify how you want to handle null values here
+        const header = Object.keys(items[0])
+        let csv = items.map((row: any) => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
+        csv.unshift(header.join(','))
+        const csvString = csv.join('\r\n')
 
-                return responses;
+        console.log(csvString);
 
-            }).then(async (responses: any[]) => {
-                if (responses == null || responses.length == 0) {
-                    this.handleError(next, "No responses to report!", "Error");
-                    return;
-                }
-                const items = responses;
-                const replacer = (key: string, value: any) => value === null ? '' : value // specify how you want to handle null values here
-                const header = Object.keys(items[0])
-                let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
-                csv.unshift(header.join(','))
-                const csvString = csv.join('\r\n')
-
-                console.log(csvString);
-
-                res.header("Content-type", "application/csv");
-                res.header("Content-disposition", `attachment; filename=${campaignId}.responsereport.csv`);
-                res.send(csvString).status(200);
-            }).catch((error) => {
-                this.handleError(next, "Error generating report", error);
-            });
+        res.header("Content-type", "application/csv");
+        res.header("Content-disposition", `attachment; filename=${campaign.id}.responsereport.csv`);
+        res.send(csvString).status(200);
     }
 
     async createCampaign(req: Request, res: Response, next: any): Promise<void> {
@@ -134,27 +138,12 @@ export default class Main extends BaseController {
     }
 
     async getCampaign(req: Request, res: Response, next: any): Promise<void> {
-        let retrievedCampaign = await Campaign.findById(req.params.id, err => {
-            if (err) {
-                this.handleError(
-                    next,
-                    "Error querying for campaign with id of " + req.params.id,
-                    err
-                );
-            }
-        });
-
-        this.sendResponse(res, retrievedCampaign.toClient());
+        this.sendResponse(res, res.locals.campaign.toClient());
     }
 
     async startCampaign(req: Request, res: Response, next: any): Promise<void> {
-        let campaignId = req.params.id;
 
-        let campaign: ICampaign = await Campaign.findById(campaignId, err => {
-            if (err) {
-                this.handleError(next, "Error retrieving campaign", err);
-            }
-        });
+        const { campaign } = res.locals;
 
         if (campaign.status != 'created') {
             let msg: string;
@@ -207,56 +196,45 @@ export default class Main extends BaseController {
         };
 
 
-        Campaign.findOneAndUpdate(
-            { _id: campaignId },
-            { $push: { messages: newMessage } },
-            { new: true },
-            (err, campaign) => {
-                if (err) {
-                    this.handleError(next, "Error creating message", err)
-                } else {
-                    this.sendResponse(res, campaign.messages[campaign.messages.length - 1]);
-                }
-            }
-        )
+        const { campaign } = res.locals;
+        
+        campaign.messages.push(newMessage);
+        campaign.save()
+            .then(() =>{this.sendResponse(res, campaign.messages[campaign.messages.length - 1]);})
+            .catch((err: any)=>{this.handleError(next, "Error creating message", err)});
     }
 
     async updateMessage(req: Request, res: Response, next: any): Promise<void> {
-        try {
+        let campaignId = req.params.campaignId;
+        let messageId = req.params.messageId;
 
-            let campaignId = req.params.campaignId;
-            let messageId = req.params.messageId;
+        const { campaign } = res.locals;
 
-            let parentCampaign = await Campaign.findById(campaignId);
-
-            let msgToUpdate = parentCampaign.messages.find(element => element.uuid == messageId);
-            if (req.body.text) {
-                msgToUpdate.text = req.body.text;
-            }
-            if (req.body.date) {
-                msgToUpdate.date = req.body.date;
-            }
-
-            await parentCampaign.save()
-                .catch(err => this.handleError(next, "Error updating message", err));
-
-            this.sendResponse(res, msgToUpdate);
-        } catch (err) {
-            console.error(err);
+        let msgToUpdate = campaign.messages.find((element: IMessage) => element.uuid == messageId);
+        if (!msgToUpdate){
+            this.handleError(next, "Message not found", {})
         }
+        if (req.body.text) {
+            msgToUpdate.text = req.body.text;
+        }
+        if (req.body.date) {
+            msgToUpdate.date = req.body.date;
+        }
+
+        campaign.save()
+            .then(() => this.sendResponse(res, msgToUpdate))
+            .catch((err: any) => this.handleError(next, "Error updating message", err));
     }
 
     async getMessage(req: Request, res: Response, next: any): Promise<void> {
-        let campaignId = req.params.campaignId;
         let msgId = req.params.id;
         let message: IMessage;
-
-        Campaign.findById(campaignId)
-            .then(async (campaign) => {
-                let index: number = await indexOfMessageSearch(campaign.messages, msgId)
-                message = campaign.messages[index];
-                this.sendResponse(res, message);
-            })
-            .catch(err => this.handleError(next, "Error finding campaign with id: " + campaignId, err));
+        const { campaign } = res.locals;
+        let index: number = await indexOfMessageSearch(campaign.messages, msgId)
+        if (index == -1){
+            this.handleError(next, "Message not found", {})
+        }
+        message = campaign.messages[index];
+        this.sendResponse(res, message);
     }
 }

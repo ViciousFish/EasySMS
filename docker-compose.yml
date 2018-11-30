@@ -13,6 +13,8 @@ services:
       - /server/node_modules
     depends_on:
       - mongo
+    environment:
+      - RUN_MODE=local
 
   mongo:
     image: mongo:3.6

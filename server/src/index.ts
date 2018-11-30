@@ -1,3 +1,12 @@
+import path from 'path';
+import dotenv from 'dotenv';
+if (process.env.RUN_MODE === 'local'){
+  const result = dotenv.config({path: path.resolve(__dirname, "../.env")});
+  if (result.error){
+    throw result.error;
+  }
+}
+
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
@@ -8,8 +17,13 @@ import helpers from './helpers';
 import { Delivery } from './models/Delivery';
 import { Campaign } from './models/Campaign';
 import { indexOfMessageSearch } from './helpers/messageSender.helper';
-import path from 'path';
 import { startup } from './helpers/startup.helper';
+import { Preference } from './models/Preference';
+import twilio from 'twilio';
+
+
+
+
 const password = process.env.ADMIN_PASSWORD || 'test';
 const secret = 'test';
 
@@ -27,10 +41,20 @@ app.use(cors({
 
 app.use('/', express.static('public'));
 
-app.post('/smsresponse', (req: Request, res: Response) => {
+const twilioWebhookMiddleware = process.env.RUN_MODE === 'local' ? (_: any, __: any, next: any) => {next()} : twilio.webhook();
+
+// TODO: create twilio delivery status update handler
+app.post('/deliveryupdate', twilioWebhookMiddleware, (req, res, next) => {
+  res.status(200).send();
+});
+
+// TODO: attach twilio security middleware
+app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Response) => {
   debugger;
   console.log("Received response", req.body);
   const user_identifier = req.body.From;
+
+  const response = req.body.toLowercase();
   Delivery.findOne({user: user_identifier}).sort({date: -1}).limit(1)
     .then(async(delivery) => {
       console.log("Found delivery by user", delivery);
@@ -44,13 +68,15 @@ app.post('/smsresponse', (req: Request, res: Response) => {
         date: Date.now()
       });
       console.log(campaign.messages);
-      return campaign.save();
+      campaign.save();
+      res.status(200).send();
     })
     .catch(error => {
       res.status(500).send("Failed to handle response");
     });
 });
 
+// TODO: Actually compare against salted+hashed pwd in database
 app.post('/api/login', (req: Request, res: Response) => {
   console.log(req);
   if (req.body.password == password) {
