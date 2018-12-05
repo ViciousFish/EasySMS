@@ -42,20 +42,6 @@ export const MessageSchema: Schema = new Schema({
 });
 
 const UserSchema: Schema = new Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  email: {
-    type: String,
-    validate: {
-      validator: function (email: string) {
-        const emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-        return emailRegex.test(email);
-      },
-      message: () => `Invalid email`
-    }
-  },
   phone: {
     type: String,
     validate: {
@@ -69,6 +55,10 @@ const UserSchema: Schema = new Schema({
 })
 
 const CampaignSchema: Schema = new Schema({
+  user_id: {
+    type: String,
+    required: true
+  },
   name: {
     type: String,
     required: true
@@ -95,6 +85,7 @@ const CampaignSchema: Schema = new Schema({
 CampaignSchema.methods.toClient = function () {
   let result: any = {};
   result.id = this._id;
+  result.user_id = this.user_id
   result.name = this.name;
   result.messages = this.messages;
   result.users = this.users;
@@ -122,8 +113,6 @@ export interface IResponse {
   date: number
 }
 export interface IUser {
-  name: string,
-  email: string,
   phone: string
 }
 export interface IMessage {
@@ -140,6 +129,7 @@ export interface IMessage {
 }
 
 export interface ICampaign extends Document {
+  user_id: string,
   name: string,
   users: [IUser],
   messages: [IMessage],

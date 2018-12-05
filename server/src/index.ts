@@ -27,7 +27,10 @@ import { indexOfMessageSearch } from './helpers/messageSender.helper';
 import { Preference } from './models/Preference';
 import { startup } from './helpers/startup.helper';
 import dispatcher from './dispatcher';
-import helpers from './helpers';
+import { CampaignRoutes } from './routes/campaign';
+import { ReportsRoutes } from './routes/reports';
+import { TwilioCredentialsRoutes } from './routes/twiliocredentials';
+
 
 const MongoStore = require('connect-mongo')(session);
 
@@ -155,7 +158,11 @@ const secured = (req: Request, res: Response, next: any) => {
 }
 
 try {
-  helpers.routing(app, secured);
+  app.use(secured);
+
+  CampaignRoutes(app);
+  ReportsRoutes(app);
+  TwilioCredentialsRoutes(app);
 
   app.use('/*', (req, res, next) => {
     res.status(200).sendFile(path.resolve(__dirname + '../../public/index.html'));

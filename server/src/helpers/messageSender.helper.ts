@@ -62,7 +62,7 @@ export async function resumeSendingMessage(campaign_id: string, message_id: stri
   campaign.users.forEach(user => {
     if (user.phone) {
       if (!deliveries[user.phone]) {
-        new TwilioDispatcher().sendMessage(campaign, message, user.email)
+        new TwilioDispatcher().sendMessage(campaign, message, user.phone)
           .then(() => {
             const delivery = new Delivery({
               campaign,
