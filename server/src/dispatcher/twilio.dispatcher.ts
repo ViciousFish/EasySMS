@@ -1,68 +1,43 @@
-import { BaseDispatcher } from "./base.dispatcher";
 import { IMessage, ICampaign } from "../models/Campaign";
 import { Delivery } from '../models/Delivery';
-
-const accountSid = process.env.TWILIO_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = require('twilio')(accountSid, authToken);
+import { ITwilioCredentials } from "../models/TwilioCredentials";
+import twilio from 'twilio';
 const twilioFromNumber = process.env.TWILIO_NUMBER;
 
-function sendMessage(msg: string, reciever: { phoneNumber: string}, message: IMessage, campaign_id: string) {
-    client.messages
-    .create({
-        body: msg,
-        from: twilioFromNumber,
-        to: reciever.phoneNumber
-    })
-    .then((result:any) => {
-        if (result.error){
-            console.error('Error sending message', result.error);
-        }
-    })
-    .catch((error:any) => {
-        const delivery = new Delivery({
-            campaign: campaign_id,
-            user: reciever.phoneNumber,
-            message: message.uuid,
-            messageBody: msg,
-            date: new Date(),
-            status: error
-            });
-            delivery.save()
-                .then(()=>{})
-                .catch((err:any) => {
-                    console.error("Failed to save a delivery!", delivery, err);
-                });
-    })
-    .done();
-}
+export class TwilioDispatcher {
 
-export default {
-    sms: {
-        sendMessage
+    client: twilio.Twilio;
+    phone: string;
+    
+    constructor({ account_sid, auth_token, phone }: ITwilioCredentials){
+        this.client = twilio(account_sid, auth_token);
+        this.phone = phone;
     }
-}
 
-export class TwilioDispatcher extends BaseDispatcher{
-    async sendMessage(campaign: ICampaign, message: IMessage, contact_method: string){
-        if (this.shouldSendToUser(contact_method, 'phone')){
-            sendMessage(message.text, {
-                phoneNumber: contact_method
-            }, message, campaign.id); 
-        } else {
+    async sendMessage(campaign: ICampaign, message: IMessage, target_phone: string){
+        this.client.messages.create({
+            body: message.text,
+            from: this.phone,
+            to: target_phone
+        }).then((result:any) => {
+            if (result.error){
+                console.error('Error sending message', result.error);
+            }
+        })
+        .catch((error:any) => {
             const delivery = new Delivery({
                 campaign: campaign.id,
-                user: contact_method,
+                user: target_phone,
                 message: message.uuid,
                 messageBody: message.text,
                 date: new Date(),
-                status: 'Message fell outside of user preferences'
-            });
-            delivery.save()
-                .then(()=>{})
-                .catch((err:any) => {
-                    console.error("Failed to save a delivery!", delivery, err);
+                status: error
                 });
-        }
+                delivery.save()
+                    .then(()=>{})
+                    .catch((err:any) => {
+                        console.error("Failed to save a delivery!", delivery, err);
+                    });
+        });
     }
 }

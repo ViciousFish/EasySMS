@@ -1,9 +1,15 @@
 import { Campaign, IMessage } from "../models/Campaign";
 import { Delivery, IDelivery } from "../models/Delivery";
 import { TwilioDispatcher } from "../dispatcher/twilio.dispatcher";
+import { TwilioCredentials } from '../models/TwilioCredentials';
 
 export async function startSendingMessage(campaign_id: string, message_id: string): Promise<void> {
   const campaign = await Campaign.findById(campaign_id);
+  const campaignTwilioCredentials = await TwilioCredentials.findOne({ user_id: campaign.user_id });
+
+  if (!campaignTwilioCredentials){
+    throw 'No twilio credentials found!';
+  }
 
   console.error("Campaign:", campaign_id);
   let messageIndex: number;
@@ -19,7 +25,7 @@ export async function startSendingMessage(campaign_id: string, message_id: strin
   campaign.users.map(user => {
     if (user.phone) {
       // Send message via phone dispatcher
-      new TwilioDispatcher().sendMessage(campaign, message, user.phone)
+      new TwilioDispatcher(campaignTwilioCredentials).sendMessage(campaign, message, user.phone)
         .then(() => {
           const delivery = new Delivery({
             campaign,
@@ -51,6 +57,12 @@ export async function resumeSendingMessage(campaign_id: string, message_id: stri
         message: message_id
       }).exec()
     ]);
+  
+  const campaignTwilioCredentials = await TwilioCredentials.findOne({ user_id: campaign.user_id });
+
+  if (!campaignTwilioCredentials){
+    throw 'No twilio credentials found!';
+  }
 
   const messages = campaign.messages.filter(m => m.uuid == message_id);
   const [deliveries, index] = await Promise.all([createDeliveriesMap(deliveriesArr), indexOfMessageSearch(messages, message_id)]);
@@ -62,7 +74,7 @@ export async function resumeSendingMessage(campaign_id: string, message_id: stri
   campaign.users.forEach(user => {
     if (user.phone) {
       if (!deliveries[user.phone]) {
-        new TwilioDispatcher().sendMessage(campaign, message, user.phone)
+        new TwilioDispatcher(campaignTwilioCredentials).sendMessage(campaign, message, user.phone)
           .then(() => {
             const delivery = new Delivery({
               campaign,

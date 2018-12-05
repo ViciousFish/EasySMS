@@ -23,7 +23,7 @@ export const TwilioCredentialsRoutes = (app: express.Application) => {
         if (!res.locals.twilioCredentials){
             res.status(404).send();
         } else {
-            res.status(200).send(res.locals.twilioCredentials)
+            res.status(200).send(res.locals.twilioCredentials);
         }
     });
 
@@ -33,13 +33,14 @@ export const TwilioCredentialsRoutes = (app: express.Application) => {
             user_id: req.user
         });
 
-        const { account_sid, auth_token } = req.body;
+        const { account_sid, auth_token, phone } = req.body;
 
         if (!account_sid || !auth_token){
             res.status(400).send();
         } else {
             twilioCredentials.account_sid = account_sid;
             twilioCredentials.auth_token = auth_token;
+            twilioCredentials.phone = phone;
             await twilioCredentials.save();
             res.status(201).send();
         }
