@@ -7,25 +7,27 @@ if (process.env.RUN_MODE === 'local'){
   }
 }
 
-import express, { Request, Response } from 'express';
+import Auth0Strategy from 'passport-auth0';
+import bcrypt from 'bcryptjs';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import dispatcher from './dispatcher';
+import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import helpers from './helpers';
-import { Delivery } from './models/Delivery';
-import { Campaign, IUser } from './models/Campaign';
-import { indexOfMessageSearch } from './helpers/messageSender.helper';
-import { startup } from './helpers/startup.helper';
-import { Preference } from './models/Preference';
-import twilio from 'twilio';
-import bcrypt from 'bcryptjs';
-import { AuthenticationUser, IAuthenticationUser } from './models/AuthenticationUser';
-import session from 'express-session';
 import morgan from 'morgan';
 import passport from 'passport';
-import Auth0Strategy from 'passport-auth0';
+import session from 'express-session';
+import twilio from 'twilio';
+
+
+import { AuthenticationUser, IAuthenticationUser } from './models/AuthenticationUser';
+import { Campaign, IUser } from './models/Campaign';
+import { Delivery } from './models/Delivery';
+import { indexOfMessageSearch } from './helpers/messageSender.helper';
+import { Preference } from './models/Preference';
+import { startup } from './helpers/startup.helper';
+import dispatcher from './dispatcher';
+import helpers from './helpers';
 
 const MongoStore = require('connect-mongo')(session);
 
@@ -42,7 +44,9 @@ app.use(cookieParser());
 app.use(cors({
   origin: true
 }))
-app.use(morgan('combined'));
+if (process.env.NODE_ENV === 'production'){
+  app.use(morgan('combined'));
+}
 
 app.use(session({
   name: 'user_sid',
@@ -65,19 +69,16 @@ const strategy = new Auth0Strategy({
     process.env.AUTH0_CALLBACK_URL || 'http://192.168.99.100:3000/login/callback'
 },
 function (accessToken:any, refreshToken: any, extraParams: any, profile: any, done:any) {
-  // accessToken is the token to call Auth0 API (not needed in the most cases)
-  // extraParams.id_token has the JSON Web Token
-  // profile has all the information from the user
-  return done(null, profile);
+  return done(null, profile.id);
 })
 
 
-passport.serializeUser(function (user: any, done) {
-  done(null, user.id);
+passport.serializeUser(function (user_id: string, done) {
+  done(null, user_id);
 });
 
-passport.deserializeUser(function (user, done) {
-  done(null, user);
+passport.deserializeUser(function (user_id: string, done) {
+  done(null, user_id);
 });
 
 passport.use(strategy);
@@ -118,19 +119,17 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
+// In local mode, we don't want to enforce this
 const twilioWebhookMiddleware = process.env.RUN_MODE === 'local' ? (_: any, __: any, next: any) => {next()} : twilio.webhook();
 
 // TODO: create twilio delivery status update handler
-app.post('/deliveryupdate', twilioWebhookMiddleware, (req, res, next) => {
+app.post('/deliveryupdate', twilioWebhookMiddleware, (req: Request, res: Response, next) => {
   res.status(200).send();
 });
 
-// TODO: attach twilio security middleware
 app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Response) => {
-  debugger;
   const user_identifier = req.body.From;
 
-  const response = req.body.toLowercase();
   Delivery.findOne({user: user_identifier}).sort({date: -1}).limit(1)
     .then(async(delivery) => {
       const campaign = await Campaign.findById(delivery.campaign);
