@@ -24,6 +24,8 @@ import bcrypt from 'bcryptjs';
 import { AuthenticationUser, IAuthenticationUser } from './models/AuthenticationUser';
 import session from 'express-session';
 import morgan from 'morgan';
+import passport from 'passport';
+import Auth0Strategy from 'passport-auth0';
 
 const MongoStore = require('connect-mongo')(session);
 
@@ -45,36 +47,76 @@ app.use(morgan('combined'));
 app.use(session({
   name: 'user_sid',
   secret,
+  cookie: {},
   store: new MongoStore({
     url: mongoUrl
   }),
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: true
 }));
 
-// This middleware will check if user's cookie is still saved in browser and user is not set, then automatically log the user out.
-// This usually happens when you stop your express server after login, your cookie still remains saved in the browser.
-app.use((req: Request, res: Response, next) => {
-  // @ts-ignore
-  if (req.cookies.user_sid && !req.session.user) {
-      res.clearCookie('user_sid');        
-  }
-  next();
+
+// @ts-ignore
+const strategy = new Auth0Strategy({
+  domain: process.env.AUTH0_DOMAIN,
+  clientID: process.env.AUTH0_CLIENT_ID,
+  clientSecret: process.env.AUTH0_CLIENT_SECRET,
+  callbackURL:
+    process.env.AUTH0_CALLBACK_URL || 'http://192.168.99.100:3000/login/callback'
+},
+function (accessToken:any, refreshToken: any, extraParams: any, profile: any, done:any) {
+  // accessToken is the token to call Auth0 API (not needed in the most cases)
+  // extraParams.id_token has the JSON Web Token
+  // profile has all the information from the user
+  return done(null, profile);
+})
+
+
+passport.serializeUser(function (user: any, done) {
+  done(null, user.id);
 });
 
-// middleware function to check for logged-in users
-var sessionChecker = (req: Request, res: Response, next: any) => {
-  // @ts-ignore
-  if (req.session.user && req.cookies.user_sid) {
-      res.redirect('/dashboard');
-  } else {
-      next();
-  }    
-};
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});
 
+passport.use(strategy);
 
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', express.static('public'));
+
+app.get('/login', passport.authenticate('auth0', {
+  scope: 'openid email profile'
+}), (req, res) => {
+  res.redirect('/');
+});
+
+app.get('/login/callback', (req: Request, res: Response, next: any) => {
+  passport.authenticate('auth0', (err: any, user: any, info: any) => {
+    if (err){
+      return next(err);
+    }
+    if (!user) {
+      return res.redirect('/login');
+    }
+    console.log("USER", user);
+    req.logIn(user, (error) => {
+      if (err){
+        return next(error);
+      }
+      const returnTo = req.session.returnTo;
+      delete req.session.returnTo;
+      res.redirect(returnTo || '/');
+    });
+  })(req, res, next);
+});
+
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
+});
 
 const twilioWebhookMiddleware = process.env.RUN_MODE === 'local' ? (_: any, __: any, next: any) => {next()} : twilio.webhook();
 
@@ -106,93 +148,15 @@ app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Resp
     });
 });
 
-app.post('/api/login', (req: Request, res: Response, next) => {
-  const { phoneNumber, password } = req.body;
-  
-  // Validate phone number format
-  if (!phoneNumber || typeof phoneNumber !== 'string' || !/\d{10}/.test(phoneNumber)) {
-    // Invalid phone number
-    res.status(400).send("Bad phone number");
-    return;
+const secured = (req: Request, res: Response, next: any) => {
+  if (req.user){
+    return next();
   }
-
-  AuthenticationUser.findOne({ phoneNumber }).then((user: IAuthenticationUser) => {
-    if (!user){
-      throw 'No user found';
-    }
-    
-    if (bcrypt.compareSync(password, user.password)){
-      // @ts-ignore
-      req.session.user = user.phoneNumber;
-    } else {
-      throw 'Bad password';
-    }
-  }).catch((error) => {
-    if (error === 'No user found' || 'Bad password'){
-      res.status(403).send("Invalid phone number or password");
-      return;
-    } else {
-      res.status(500).send("Something went wrong");
-    }
-  });
-});
-
-app.post('/changePassword', sessionChecker, (req: Request, res: Response, next: any) => {
-  const { phoneNumber, password, newPassword } = req.body;
-
-  // Validate phone number format
-  if (!phoneNumber || typeof phoneNumber !== 'string' || !/\d{10}/.test(phoneNumber)) {
-    // Invalid phone number
-    res.status(400).send("Bad phone number");
-    return;
-  }
-
-  if (!password || !newPassword) {
-    // Missing passwords
-    res.status(400).send("Need passwords");
-    return;
-  }
-  
-  AuthenticationUser.findOne({ phoneNumber }).then((user: IAuthenticationUser) => {
-    if (!user){
-      throw 'No user found';
-    }
-    
-    if (bcrypt.compareSync(password, user.password)){
-
-
-      const salt = bcrypt.genSaltSync(12);
-      const hash = bcrypt.hashSync(newPassword, salt);
-      user.password = hash;
-      user.save()
-        .then(() => {
-          // @ts-ignore
-          if (req.session.user && req.cookies.user_sid) {
-            res.clearCookie('user_sid');
-          }
-          res.status(201).send("Password successfully changed");
-          return;
-        })
-        .catch((error) => {
-          console.error("Error saving user password! Log omitted for security");
-          res.status(500).send("Something went wrong");
-          return;
-        });
-    } else {
-      throw 'Bad password';
-    }
-  }).catch((error) => {
-    if (error === 'No user found' || 'Bad password'){
-      res.status(403).send("Invalid phone number or password");
-      return;
-    } else {
-      res.status(500).send("Something went wrong");
-    }
-  });
-});
+  res.status(403).send();
+}
 
 try {
-  helpers.routing(app, sessionChecker);
+  helpers.routing(app, secured);
 
   app.use('/*', (req, res, next) => {
     res.status(200).sendFile(path.resolve(__dirname + '../../public/index.html'));
