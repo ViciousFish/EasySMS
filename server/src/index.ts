@@ -1,8 +1,8 @@
 import path from 'path';
 import dotenv from 'dotenv';
-if (process.env.RUN_MODE === 'local'){
-  const result = dotenv.config({path: path.resolve(__dirname, "../.env")});
-  if (result.error){
+if (process.env.RUN_MODE === 'local') {
+  const result = dotenv.config({ path: path.resolve(__dirname, "../.env") });
+  if (result.error) {
     throw result.error;
   }
 }
@@ -47,7 +47,7 @@ app.use(cookieParser());
 app.use(cors({
   origin: true
 }))
-if (process.env.NODE_ENV === 'production'){
+if (process.env.NODE_ENV === 'production') {
   app.use(morgan('combined'));
 }
 
@@ -71,9 +71,9 @@ const strategy = new Auth0Strategy({
   callbackURL:
     process.env.AUTH0_CALLBACK_URL || 'http://localhost:3000/login/callback'
 },
-function (accessToken:any, refreshToken: any, extraParams: any, profile: any, done:any) {
-  return done(null, profile.id);
-})
+  function (accessToken: any, refreshToken: any, extraParams: any, profile: any, done: any) {
+    return done(null, profile.id);
+  })
 
 
 passport.serializeUser(function (user_id: string, done) {
@@ -91,7 +91,10 @@ app.use(passport.session());
 
 app.use('/', express.static('public'));
 
-app.get('/login', passport.authenticate('auth0', {
+app.get('/login', (req, res, next) => {
+  req.session.returnTo = req.query.returnTo;
+  next();
+}, passport.authenticate('auth0', {
   scope: 'openid email profile'
 }), (req, res) => {
   res.redirect('/');
@@ -99,7 +102,7 @@ app.get('/login', passport.authenticate('auth0', {
 
 app.get('/login/callback', (req: Request, res: Response, next: any) => {
   passport.authenticate('auth0', (err: any, user: any, info: any) => {
-    if (err){
+    if (err) {
       return next(err);
     }
     if (!user) {
@@ -107,7 +110,7 @@ app.get('/login/callback', (req: Request, res: Response, next: any) => {
     }
     console.log("USER", user);
     req.logIn(user, (error) => {
-      if (err){
+      if (err) {
         return next(error);
       }
       const returnTo = req.session.returnTo;
@@ -123,7 +126,7 @@ app.get('/logout', (req, res) => {
 });
 
 // In local mode, we don't want to enforce this
-const twilioWebhookMiddleware = process.env.RUN_MODE === 'local' ? (_: any, __: any, next: any) => {next()} : twilio.webhook();
+const twilioWebhookMiddleware = process.env.RUN_MODE === 'local' ? (_: any, __: any, next: any) => { next() } : twilio.webhook();
 
 // TODO: create twilio delivery status update handler
 app.post('/deliveryupdate', twilioWebhookMiddleware, (req: Request, res: Response, next) => {
@@ -133,8 +136,8 @@ app.post('/deliveryupdate', twilioWebhookMiddleware, (req: Request, res: Respons
 app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Response) => {
   const user_identifier = req.body.From;
 
-  Delivery.findOne({user: user_identifier}).sort({date: -1}).limit(1)
-    .then(async(delivery) => {
+  Delivery.findOne({ user: user_identifier }).sort({ date: -1 }).limit(1)
+    .then(async (delivery) => {
       const campaign = await Campaign.findById(delivery.campaign);
       const index = await indexOfMessageSearch(campaign.messages, delivery.message);
       campaign.messages[index].responses.push({
@@ -151,7 +154,7 @@ app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Resp
 });
 
 const secured = (req: Request, res: Response, next: any) => {
-  if (req.user){
+  if (req.user) {
     return next();
   }
   res.status(403).send();

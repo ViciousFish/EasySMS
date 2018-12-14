@@ -11,15 +11,13 @@
 </template>
 
 <script>
-import axios from 'axios';
-import urljoin from 'url-join';
-import { API_URL } from '@/config';
-import {authOptions} from '@/store';
+import axios from "axios";
+import urljoin from "url-join";
+import { API_URL } from "@/config";
+import { authOptions } from "@/store";
 
 export default {
-  mounted() {
-    axios.post(urljoin(API_URL, 'login'), { password: 'test'});
-  },
+  mounted() {}
 };
 </script>
 
@@ -30,7 +28,7 @@ body {
   line-height: 1.8;
   margin: 0;
   font-family: "Avenir", Helvetica, Arial, sans-serif;
-  font-family: 'Trebuchet MS', sans-serif;
+  font-family: "Trebuchet MS", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
@@ -44,7 +42,7 @@ nav {
   height: 100vh;
   overflow: auto;
   background: #333;
-  background-image: url('./assets/mountains.jpg');
+  background-image: url("./assets/mountains.jpg");
   background-size: cover;
   background-position: center center;
 }
@@ -65,7 +63,7 @@ nav a:hover {
   margin-left: 260px;
   overflow-x: hidden;
   overflow-y: visible;
-height: 100vh;
+  height: 100vh;
 }
 .router-link-active {
   text-decoration: underline;

@@ -4,8 +4,19 @@ import urljoin from 'url-join';
 import axios from 'axios';
 import papa from 'papaparse';
 import { API_URL } from './config';
+import Axios from 'axios';
 
 Vue.use(Vuex);
+
+const HOME_URL = API_URL.substring(0, API_URL.length - 3);
+const axiosInstance = axios.create({ withCredentials: true, baseURL: HOME_URL });
+
+axiosInstance.interceptors.response.use(null, ({ response }) => {
+  console.log("IS IT BEING HIT?!");
+  if (response.status == 403) {
+    window.location = HOME_URL + "login?returnTo=" + window.location;
+  }
+});
 
 export const authOptions = {
   headers: {
@@ -54,7 +65,7 @@ export default new Vuex.Store({
       });
     },
     async newCampaign(context, { name, users }) {
-      const newCampaign = (await axios.post(urljoin(API_URL, '/campaign'), {
+      const newCampaign = (await axiosInstance.post(urljoin('api/campaign'), {
         name,
         users,
       }, authOptions)).data;
@@ -65,11 +76,11 @@ export default new Vuex.Store({
       // commit new campaign
     },
     async fetchCampaigns(context) {
-      const campaigns = (await axios.get(urljoin(API_URL, '/campaigns'), authOptions)).data;
+      const campaigns = (await axiosInstance.get('api/campaigns'), authOptions).data;
       context.commit('RECEIVE_CAMPAIGNS', campaigns);
     },
     async sendCampaign(context, { campaign }) {
-      return axios.post(urljoin(API_URL, 'campaign', campaign, 'start'), {}, authOptions);
+      return axiosInstance.post(urljoin('api/campaign', campaign, 'start'), {}, authOptions);
     },
     async newMessage(context, { message, campaign }) {
       const payload = {
@@ -77,7 +88,7 @@ export default new Vuex.Store({
         date: message.date.getTime(),
         campaignId: campaign,
       };
-      const newMessage = (await axios.post(urljoin(API_URL, `/campaign/${campaign}/message`), payload, authOptions)).data;
+      const newMessage = (await axiosInstance.post(urljoin(`api/campaign/${campaign}/message`), payload, authOptions)).data;
       context.commit('RECEIVE_NEW_MESSAGE', { message: newMessage, campaign });
       return newMessage;
     },
