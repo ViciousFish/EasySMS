@@ -26,7 +26,6 @@ import { Delivery } from './models/Delivery';
 import { indexOfMessageSearch } from './helpers/messageSender.helper';
 import { Preference } from './models/Preference';
 import { startup } from './helpers/startup.helper';
-import dispatcher from './dispatcher';
 import { CampaignRoutes } from './routes/campaign';
 import { ReportsRoutes } from './routes/reports';
 import { TwilioCredentialsRoutes } from './routes/twiliocredentials';
@@ -69,7 +68,7 @@ const strategy = new Auth0Strategy({
   clientID: process.env.AUTH0_CLIENT_ID,
   clientSecret: process.env.AUTH0_CLIENT_SECRET,
   callbackURL:
-    process.env.AUTH0_CALLBACK_URL || 'http://192.168.99.100:3000/login/callback'
+    process.env.AUTH0_CALLBACK_URL || 'http://localhost:3000/login/callback'
 },
 function (accessToken:any, refreshToken: any, extraParams: any, profile: any, done:any) {
   return done(null, profile.id);
