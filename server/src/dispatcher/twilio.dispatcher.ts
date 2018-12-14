@@ -2,7 +2,6 @@ import { IMessage, ICampaign } from "../models/Campaign";
 import { Delivery } from '../models/Delivery';
 import { ITwilioCredentials } from "../models/TwilioCredentials";
 import twilio from 'twilio';
-const twilioFromNumber = process.env.TWILIO_NUMBER;
 
 export class TwilioDispatcher {
 

@@ -29,6 +29,7 @@ import { startup } from './helpers/startup.helper';
 import { CampaignRoutes } from './routes/campaign';
 import { ReportsRoutes } from './routes/reports';
 import { TwilioCredentialsRoutes } from './routes/twiliocredentials';
+import { TwilioCredentials } from './models/TwilioCredentials';
 
 
 const MongoStore = require('connect-mongo')(session);
@@ -156,12 +157,24 @@ const secured = (req: Request, res: Response, next: any) => {
   res.status(403).send();
 }
 
+const checkTwilioCredentials = async (req: Request, res: Response, next: any) => {
+  const twiliocredentials = await TwilioCredentials.findOne({ user_id: req.user });
+  if (twiliocredentials){
+    return next();
+  }
+
+  res.status(422).send("User has no twilio credentials");
+};
+
 try {
   app.use(secured);
 
+  TwilioCredentialsRoutes(app);
+
+  app.use(checkTwilioCredentials);
+
   CampaignRoutes(app);
   ReportsRoutes(app);
-  TwilioCredentialsRoutes(app);
 
   app.use('/*', (req, res, next) => {
     res.status(200).sendFile(path.resolve(__dirname + '../../public/index.html'));

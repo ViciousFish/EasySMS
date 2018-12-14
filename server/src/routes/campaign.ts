@@ -42,6 +42,15 @@ const createCampaign = async (req: Request, res: Response, next: any) => {
     res.status(201).send( newCampaignObject.toClient());
 }
 
+const deleteCampaign = async (req: Request, res: Response, next: any) => {
+    const campaign: ICampaign = res.locals.campaign;
+    campaign.messages.forEach(message => MessageScheduler.removeScheduledMessage(message.uuid));
+
+    await Campaign.deleteOne({ id: campaign.id });
+
+    res.status(202).send({});
+}
+
 const startCampaign = async (req: Request, res: Response, next: any) => {
     const { campaign } = res.locals;
 
@@ -106,7 +115,7 @@ const updateMessage = async (req: Request, res: Response, next: any) => {
     let messageId = req.params.messageId;
     const { campaign } = res.locals;
 
-    let msgToUpdate = campaign.messages.find((element: IMessage) => element.uuid == messageId);
+    let msgToUpdate: IMessage = campaign.messages.find((element: IMessage) => element.uuid == messageId);
     if (!msgToUpdate){
         res.status(404).send();
         return;
@@ -118,8 +127,30 @@ const updateMessage = async (req: Request, res: Response, next: any) => {
         msgToUpdate.date = req.body.date;
     }
 
+    if (msgToUpdate.status == 'needs-rescheduling'){
+        msgToUpdate.status = 'pending';
+    }
+
     await campaign.save();
     res.status(201).send(msgToUpdate);
+}
+
+const deleteMessage = async (req: Request, res: Response, next: any) => {
+    const campaign: ICampaign = res.locals.campaign;
+
+    const index = await indexOfMessageSearch(campaign.messages, req.params.messageId);
+
+    if (index == -1){
+        next({
+            status: 404,
+            message: "message not found"
+        });
+    }
+
+    campaign.messages.splice(index, 1);
+    MessageScheduler.removeScheduledMessage(req.params.messageId);
+    await campaign.save();
+    res.status(202).send({});
 }
 
 export const getCampaignAndValidateAuth = async (req: Request, res: Response, next: any) => {
@@ -134,7 +165,7 @@ export const getCampaignAndValidateAuth = async (req: Request, res: Response, ne
         next({
             status: 401,
             message: "Unauthorized"
-        })
+        });
     } else {
         res.locals.campaign = campaign;
         next();
@@ -150,12 +181,14 @@ export const CampaignRoutes = (app: express.Application) => {
     router.get('/', getCampaigns);
     router.get('/:campaign_id', getCampaign);
     router.post('/', createCampaign);
+    router.delete('/:campaign_id', deleteCampaign);
 
     router.post('/:campaign_id/start', startCampaign);
 
     router.get('/:campaign_id/message/:messageId', getMessage);
     router.post('/:campaign_id/message', createMessage);
     router.put('/:campaign_id/message/:messageId', updateMessage);
+    router.delete('/:campaign_id/message/:messageId', deleteMessage);
 
     app.use(routerPath, router);
 };

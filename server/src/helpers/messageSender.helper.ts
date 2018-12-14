@@ -22,10 +22,11 @@ export async function startSendingMessage(campaign_id: string, message_id: strin
   }
   campaign.messages[messageIndex].status = 'started';
   await campaign.save();
+  const twilioDispatcher = new TwilioDispatcher(campaignTwilioCredentials);
   campaign.users.map(user => {
     if (user.phone) {
       // Send message via phone dispatcher
-      new TwilioDispatcher(campaignTwilioCredentials).sendMessage(campaign, message, user.phone)
+      twilioDispatcher.sendMessage(campaign, message, user.phone)
         .then(() => {
           const delivery = new Delivery({
             campaign,
@@ -71,10 +72,11 @@ export async function resumeSendingMessage(campaign_id: string, message_id: stri
   }
   let message = messages[index];
 
+  const twilioDispatcher = new TwilioDispatcher(campaignTwilioCredentials);
   campaign.users.forEach(user => {
     if (user.phone) {
       if (!deliveries[user.phone]) {
-        new TwilioDispatcher(campaignTwilioCredentials).sendMessage(campaign, message, user.phone)
+        twilioDispatcher.sendMessage(campaign, message, user.phone)
           .then(() => {
             const delivery = new Delivery({
               campaign,

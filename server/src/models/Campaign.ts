@@ -37,7 +37,7 @@ export const MessageSchema: Schema = new Schema({
     type: String,
     default: 'pending',
     required: true,
-    enum: ['pending', 'started', 'complete']
+    enum: ['pending', 'started', 'complete', 'no-credentials', 'needs-rescheduling']
   }
 });
 
@@ -120,7 +120,7 @@ export interface IMessage {
   uuid: string,
   text: string,
   date: number,
-  status: 'pending' | 'started' | 'complete',
+  status: 'pending' | 'started' | 'complete' | 'no-credentials' | 'needs-rescheduling',
   responses: [{
     user: string,
     text: string,
