@@ -89,6 +89,7 @@ passport.use(strategy);
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use('/', express.static('public'));
 
 app.get('/login', (req, res, next) => {
   req.session.returnTo = req.query.returnTo;
@@ -151,7 +152,6 @@ app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Resp
     res.status(500).send("Failed to handle response");
   });
 });
-app.use('/', express.static('public'));
 
 const secured = (req: Request, res: Response, next: any) => {
   if (req.user) {
