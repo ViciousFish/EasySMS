@@ -89,7 +89,6 @@ passport.use(strategy);
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/', express.static('public'));
 
 app.get('/login', (req, res, next) => {
   req.session.returnTo = req.query.returnTo;
@@ -135,23 +134,24 @@ app.post('/deliveryupdate', twilioWebhookMiddleware, (req: Request, res: Respons
 
 app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Response) => {
   const user_identifier = req.body.From;
-
+  
   Delivery.findOne({ user: user_identifier }).sort({ date: -1 }).limit(1)
-    .then(async (delivery) => {
-      const campaign = await Campaign.findById(delivery.campaign);
-      const index = await indexOfMessageSearch(campaign.messages, delivery.message);
-      campaign.messages[index].responses.push({
-        user: user_identifier,
-        text: req.body.Body,
-        date: Date.now()
-      });
-      campaign.save();
-      res.status(200).send();
-    })
-    .catch(error => {
-      res.status(500).send("Failed to handle response");
+  .then(async (delivery) => {
+    const campaign = await Campaign.findById(delivery.campaign);
+    const index = await indexOfMessageSearch(campaign.messages, delivery.message);
+    campaign.messages[index].responses.push({
+      user: user_identifier,
+      text: req.body.Body,
+      date: Date.now()
     });
+    campaign.save();
+    res.status(200).send();
+  })
+  .catch(error => {
+    res.status(500).send("Failed to handle response");
+  });
 });
+app.use('/', express.static('public'));
 
 const secured = (req: Request, res: Response, next: any) => {
   if (req.user) {

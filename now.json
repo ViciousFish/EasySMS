@@ -2,11 +2,11 @@
   "name":"ohack2018",
   "type":"docker",
   "env": {
-    "ADMIN_PASSWORD": "@admin-password",
     "MONGO_URL":"@mongo-url",
-    "TWILIO_SID":"@twilio-sid",
-    "TWILIO_AUTH_TOKEN":"@twilio-auth-token",
-    "API_URL": "https://ohack2018-team19.now.sh/api"
+    "API_URL": "https://ohack2018-team19.now.sh/api",
+    "AUTH0_DOMAIN": "@auth0-domain",
+    "AUTH0_CLIENT_ID":"@auth0-client-id",
+    "AUTH0_CLIENT_SECRET":"@auth0-client-secret"
   },
   "alias": "https://ohack2018-team19.now.sh"
 }
