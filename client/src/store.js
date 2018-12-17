@@ -12,10 +12,10 @@ const HOME_URL = API_URL.substring(0, API_URL.length - 3);
 const axiosInstance = axios.create({ withCredentials: true, baseURL: HOME_URL });
 
 axiosInstance.interceptors.response.use(null, ({ response }) => {
-  if (response.status === 403) {
+  if (response.status === 401) {
     window.location = `${HOME_URL}login?returnTo=${window.location}`;
   }
-  if (response.status === 422) {
+  if (response.status === 403) {
     // TODO: implement this
     console.log("User has no twilio credentials");
     router.push('/settings');

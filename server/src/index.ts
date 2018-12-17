@@ -158,7 +158,7 @@ const secured = (req: Request, res: Response, next: any) => {
   if (req.user) {
     return next();
   }
-  res.status(403).send();
+  res.status(401).send();
 }
 
 const checkTwilioCredentials = async (req: Request, res: Response, next: any) => {
@@ -167,7 +167,7 @@ const checkTwilioCredentials = async (req: Request, res: Response, next: any) =>
     return next();
   }
 
-  res.status(422).send();
+  res.status(403).send();
 };
 
 try {
