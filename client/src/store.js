@@ -14,6 +14,11 @@ axiosInstance.interceptors.response.use(null, ({ response }) => {
   if (response.status === 403) {
     window.location = `${HOME_URL}login?returnTo=${window.location}`;
   }
+  if (response.status === 422) {
+    // TODO: implement this
+    console.log("User has no twilio credentials");
+  }
+  return response;
 });
 
 export default new Vuex.Store({

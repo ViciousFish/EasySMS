@@ -45,11 +45,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-  origin: true
-}))
-if (process.env.NODE_ENV === 'production') {
+  origin: true,
+  credentials: true
+}));
+// if (process.env.NODE_ENV === 'production') {
   app.use(morgan('combined'));
-}
+// }
 
 app.use(session({
   name: 'user_sid',
