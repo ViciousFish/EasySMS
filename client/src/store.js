@@ -16,12 +16,6 @@ axiosInstance.interceptors.response.use(null, ({ response }) => {
   }
 });
 
-export const authOptions = {
-  headers: {
-    Authorization: 'test',
-  },
-};
-
 export default new Vuex.Store({
   state: {
     campaignMap: {},
@@ -66,7 +60,7 @@ export default new Vuex.Store({
       const newCampaign = (await axiosInstance.post(urljoin('api/campaign'), {
         name,
         users,
-      }, authOptions)).data;
+      })).data;
 
       context.commit('newCampaign', newCampaign);
       return newCampaign.id;
@@ -74,11 +68,11 @@ export default new Vuex.Store({
       // commit new campaign
     },
     async fetchCampaigns(context) {
-      const campaigns = (await axiosInstance.get('api/campaigns'), authOptions).data;
+      const campaigns = (await axiosInstance.get('api/campaigns')).data;
       context.commit('RECEIVE_CAMPAIGNS', campaigns);
     },
     async sendCampaign(context, { campaign }) {
-      return axiosInstance.post(urljoin('api/campaign', campaign, 'start'), {}, authOptions);
+      return axiosInstance.post(urljoin('api/campaign', campaign, 'start'), {});
     },
     async newMessage(context, { message, campaign }) {
       const payload = {
@@ -86,7 +80,7 @@ export default new Vuex.Store({
         date: message.date.getTime(),
         campaignId: campaign,
       };
-      const newMessage = (await axiosInstance.post(urljoin(`api/campaign/${campaign}/message`), payload, authOptions)).data;
+      const newMessage = (await axiosInstance.post(urljoin(`api/campaign/${campaign}/message`), payload)).data;
       context.commit('RECEIVE_NEW_MESSAGE', { message: newMessage, campaign });
       return newMessage;
     },
