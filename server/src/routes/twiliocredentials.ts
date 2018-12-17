@@ -45,11 +45,13 @@ export const TwilioCredentialsRoutes = (app: express.Application) => {
             twilioCredentials.phone = phone;
 
 
-            try {
-                const client = twilio(twilioCredentials.account_sid, twilioCredentials.auth_token);
-            } catch(error) {
-                res.status(422).send("Credentials invalid");
-                return;
+            if (process.env.RUN_MODE !== 'local'){
+                try {
+                    const client = twilio(twilioCredentials.account_sid, twilioCredentials.auth_token);
+                } catch(error) {
+                    res.status(422).send("Credentials invalid");
+                    return;
+                }
             }
 
             await twilioCredentials.save();
