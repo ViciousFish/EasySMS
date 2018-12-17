@@ -19,6 +19,11 @@ export default new Router({
       component: () => import('./views/Report.vue'),
     },
     {
+      path: '/settings',
+      name: 'Settings',
+      component: () => import('./views/Settings.vue'),
+    },
+    {
       path: '/campaign',
       component: () => import('./views/campaign/CampaignContainer.vue'),
       children: [

@@ -4,6 +4,7 @@ import urljoin from 'url-join';
 import axios from 'axios';
 import papa from 'papaparse';
 import { API_URL } from './config';
+import router from './router';
 
 Vue.use(Vuex);
 
@@ -17,6 +18,7 @@ axiosInstance.interceptors.response.use(null, ({ response }) => {
   if (response.status === 422) {
     // TODO: implement this
     console.log("User has no twilio credentials");
+    router.push('/settings');
   }
   return response;
 });
@@ -38,6 +40,9 @@ export default new Vuex.Store({
     },
     RECEIVE_NEW_MESSAGE(state, { campaign, message }) {
       state.campaignMap[campaign].messages.push(message);
+    },
+    RECEIVE_TWILIO_INFORMATION(state, twilioInformation) {
+      console.log(twilioInformation);
     },
   },
   getters: {
@@ -74,7 +79,9 @@ export default new Vuex.Store({
     },
     async fetchCampaigns(context) {
       const campaigns = (await axiosInstance.get('api/campaign')).data;
-      context.commit('RECEIVE_CAMPAIGNS', campaigns);
+      if (campaigns) {
+        context.commit('RECEIVE_CAMPAIGNS', campaigns);
+      }
     },
     async sendCampaign(context, { campaign }) {
       return axiosInstance.post(urljoin('api/campaign', campaign, 'start'), {});
@@ -88,6 +95,11 @@ export default new Vuex.Store({
       const newMessage = (await axiosInstance.post(urljoin(`api/campaign/${campaign}/message`), payload)).data;
       context.commit('RECEIVE_NEW_MESSAGE', { message: newMessage, campaign });
       return newMessage;
+    },
+    async fetchTwilio(context) {
+      const twilioInformation = (await axiosInstance.get('api/twiliocredentials')).data;
+      console.log(twilioInformation);
+      context.commit('RECEIVE_TWILIO_INFORMATION', twilioInformation);
     },
   },
 });
