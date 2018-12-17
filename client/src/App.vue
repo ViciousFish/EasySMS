@@ -13,7 +13,7 @@
 
 <script>
 export default {
-  mounted() {},
+  mounted() {}
 };
 </script>
 
@@ -23,8 +23,8 @@ body {
   background: #eee;
   line-height: 1.8;
   margin: 0;
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  font-family: "Trebuchet MS", sans-serif;
+  // font-family: "Avenir", Helvetica, Arial, sans-serif;
+  // font-family: "Trebuchet MS", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
@@ -82,5 +82,12 @@ nav a:hover {
 }
 .btn-success:hover {
   background: rgb(0, 204, 0);
+}
+
+input[type="text"] {
+  border-style: solid;
+  border-width: 1px;
+  border-color: rgb(212, 212, 212);
+  border-radius: 3px;
 }
 </style>
