@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "basscss": "^8.0.10",
+    "basscss": "^8.0.4",
+    "basscss-basic": "^1.0.0",
     "papaparse": "^4.6.2",
     "url-join": "^4.0.0",
     "vue": "^2.5.21",
