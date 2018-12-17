@@ -28,6 +28,7 @@ export default new Vuex.Store({
     campaignMap: {},
     messageMap: {},
     inputcsv: {},
+    twilioInformation: {},
   },
   mutations: {
     newCampaign(state, campaign) {
@@ -42,7 +43,7 @@ export default new Vuex.Store({
       state.campaignMap[campaign].messages.push(message);
     },
     RECEIVE_TWILIO_INFORMATION(state, twilioInformation) {
-      console.log(twilioInformation);
+      Vue.set(state, 'twilioInformation', twilioInformation);
     },
   },
   getters: {
@@ -97,7 +98,12 @@ export default new Vuex.Store({
       return newMessage;
     },
     async fetchTwilio(context) {
-      const twilioInformation = (await axiosInstance.get('api/twiliocredentials')).data;
+      const response = (await axiosInstance.get('api/twiliocredentials'));
+      console.log(response);
+      const twilioInformation = {
+        exists: response.status === 404 ? false : true,
+        ...response.data,
+      };
       console.log(twilioInformation);
       context.commit('RECEIVE_TWILIO_INFORMATION', twilioInformation);
     },
