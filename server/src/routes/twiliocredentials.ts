@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { TwilioCredentials } from '../models/TwilioCredentials';
 import { Campaign } from '../models/Campaign';
 import { MessageScheduler } from '../helpers/messageScheduler.helper';
+import twilio = require('twilio');
 
 export const TwilioCredentialsRoutes = (app: express.Application) => {
 
@@ -42,6 +43,15 @@ export const TwilioCredentialsRoutes = (app: express.Application) => {
             twilioCredentials.account_sid = account_sid;
             twilioCredentials.auth_token = auth_token;
             twilioCredentials.phone = phone;
+
+
+            try {
+                const client = twilio(twilioCredentials.account_sid, twilioCredentials.auth_token);
+            } catch(error) {
+                res.status(422).send("Credentials invalid");
+                return;
+            }
+
             await twilioCredentials.save();
 
             const campaigns = await Campaign.find({ user_id: req.user });
