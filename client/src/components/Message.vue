@@ -8,24 +8,31 @@
     <a @click="edit" v-if="!editing && message===null">+ new</a>
     <form @submit="save" class="flex flex-auto" v-if="editing">
       <datepicker v-model="temp.date" input-class="p1 mr1" placeholder="date to send"></datepicker>
-      <input type="button" v-if="!minuteplus" class="p1 mr1 button" value="1 minute from now" @click="setTimePlus"/>
-      <input class="flex-auto mr1 p1" type="text" v-model="temp.text" placeholder="message text" />
+      <input type="button"
+        v-if="!minuteplus"
+        class="p1 mr1 button"
+        value="1 minute from now"
+        @click="setTimePlus"/>
+      <input class="flex-auto mr1 p1"
+        type="text"
+        v-model="temp.text"
+        placeholder="message text" />
       <input type="submit" class="p1 button" value="save" />
     </form>
   </div>
 </template>
 
 <script>
-import datepicker from "vuejs-datepicker";
+import datepicker from 'vuejs-datepicker';
 
 export default {
-  props: ["message", "campaignid", "editable"],
+  props: ['message', 'campaignid', 'editable'],
   data() {
     return {
       editing: false,
       minuteplus: false,
       temp: {
-        text: "",
+        text: '',
         date: null,
       },
     };
@@ -35,7 +42,7 @@ export default {
       const d = new Date(this.message.date);
       // return "" + d.toLocaleString() + d.toTimeString();
       return d.toLocaleString();
-    }
+    },
   },
   mounted() {
     if (this.message) {
@@ -49,7 +56,13 @@ export default {
     },
     setTimePlus() {
       const today = this.temp.date;
-      const newDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes() + 1, 0, 0);
+      const newDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        today.getHours(),
+        today.getMinutes() + 1, 0, 0,
+      );
       this.temp.date = newDate;
       this.minuteplus = true;
     },
@@ -58,21 +71,21 @@ export default {
       if (this.temp.text.length > 0 && this.temp.date !== null) {
         this.editing = false;
         if (!this.message) {
-          this.$store.dispatch("newMessage", {
+          this.$store.dispatch('newMessage', {
             message: this.temp,
-            campaign: this.campaignid
+            campaign: this.campaignid,
           });
           this.temp = {
-            text: "",
-            date: null
+            text: '',
+            date: null,
           };
         }
       }
-    }
+    },
   },
   components: {
     datepicker,
-  }
+  },
 };
 </script>
 

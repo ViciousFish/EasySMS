@@ -4,7 +4,6 @@ import urljoin from 'url-join';
 import axios from 'axios';
 import papa from 'papaparse';
 import { API_URL } from './config';
-import Axios from 'axios';
 
 Vue.use(Vuex);
 
@@ -12,9 +11,8 @@ const HOME_URL = API_URL.substring(0, API_URL.length - 3);
 const axiosInstance = axios.create({ withCredentials: true, baseURL: HOME_URL });
 
 axiosInstance.interceptors.response.use(null, ({ response }) => {
-  console.log("IS IT BEING HIT?!");
-  if (response.status == 403) {
-    window.location = HOME_URL + "login?returnTo=" + window.location;
+  if (response.status === 403) {
+    window.location = `${HOME_URL}login?returnTo=${window.location}`;
   }
 });
 

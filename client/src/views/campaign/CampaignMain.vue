@@ -1,6 +1,9 @@
 <template>
   <div class="flex flex-column">
-    <router-link class="p3" v-for="campaign in Object.values(campaigns)" :key="campaign.id" :to="`/campaign/${campaign.id}/edit`">
+    <router-link class="p3"
+      v-for="campaign in Object.values(campaigns)"
+      :key="campaign.id"
+      :to="`/campaign/${campaign.id}/edit`">
       <span class="status-created" v-if="campaign.status==='created'">.</span>
       <span class="status-in-progress" v-if="campaign.status==='in-progress'">.</span>
       {{campaign.name}}

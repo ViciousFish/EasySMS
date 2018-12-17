@@ -3,11 +3,17 @@
     <h1>{{campaign.name}}</h1>
     Messages
     <div class="">
-      <message v-for="message in campaign.messages" :key="message.id" :message="message" :editable="campaign.status === 'created'" :campaignid="campaign.id" />
-      <message v-if="campaign.status === 'created'" key="0" :message="null" :campaignid="campaign.id" />
+      <message v-for="message in campaign.messages"
+        :key="message.id"
+        :message="message"
+        :editable="campaign.status === 'created'"
+        :campaignid="campaign.id" />
+      <message v-if="campaign.status === 'created'"
+        key="0" :message="null"
+        :campaignid="campaign.id" />
     </div>
     <div>
-      <div @click="next" class="button btn-success py1 px2 my1">
+      <div @click="next" class='button btn-success py1 px2 my1'>
         Next
       </div>
     </div>
@@ -15,17 +21,17 @@
 </template>
 
 <script>
-import Message from "@/components/Message.vue";
+import Message from '@/components/Message.vue';
 
 export default {
-  props: ["id"],
+  props: ['id'],
   components: {
-    Message
+    Message,
   },
   computed: {
     campaign() {
       return this.$store.getters.campaignById(this.id);
-    }
+    },
   },
   methods: {
     next() {

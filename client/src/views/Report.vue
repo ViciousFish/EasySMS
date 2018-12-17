@@ -1,25 +1,27 @@
 <template>
   <div class="flex flex-column">
-    <div class="p3 flex report-row" v-for="campaign in Object.values(campaigns)" :key="campaign.id" :to="`/campaign/${campaign.id}/edit`">
+    <div class="p3 flex report-row"
+      v-for="campaign in Object.values(campaigns)"
+      :key="campaign.id"
+      :to="`/campaign/${campaign.id}/edit`">
       <span class="block flex-auto">{{campaign.name}}</span>
-      <a :href="urljoin(API_URL, 'campaign', campaign.id, 'responses')" class="button px1 mr1">Response Report</a>
-      <a :href="urljoin(API_URL, 'campaign', campaign.id, 'deliveries')" class="button px1">Delivery Report</a>
+      <a :href="urljoin(API_URL, 'campaign', campaign.id, 'responses')"
+        class="button px1 mr1">Response Report</a>
+      <a :href="urljoin(API_URL, 'campaign', campaign.id, 'deliveries')"
+        class="button px1">Delivery Report</a>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
 import urljoin from 'url-join';
 import { API_URL } from '@/config';
-import {authOptions} from '@/store';
 
 export default {
   data() {
-    return {API_URL}
+    return { API_URL };
   },
   mounted() {
-    console.log(API_URL);
     this.$store.dispatch('fetchCampaigns');
   },
   computed: {
@@ -30,8 +32,8 @@ export default {
   methods: {
     urljoin(...args) {
       return urljoin(args);
-    }
-  }
+    },
+  },
 };
 </script>
 

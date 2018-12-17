@@ -11,13 +11,8 @@
 </template>
 
 <script>
-import axios from "axios";
-import urljoin from "url-join";
-import { API_URL } from "@/config";
-import { authOptions } from "@/store";
-
 export default {
-  mounted() {}
+  mounted() {},
 };
 </script>
 

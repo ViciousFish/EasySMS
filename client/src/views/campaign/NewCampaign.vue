@@ -2,7 +2,11 @@
   <div class="flex flex-column">
     <transition name="fade">
       <div class="flex flex-column" v-if="!parsing && !users">
-        <input class="p2 m1 h3 flex-auto" type="text" v-model="campaignName" placeholder="Campaign Name" autofocus/>
+        <input class="p2 m1 h3 flex-auto"
+          type="text"
+          v-model="campaignName"
+          placeholder="Campaign Name"
+          autofocus/>
         <input class="m1 h4" type="file" ref="file" accept="text/csv">
         <div>
           <div @click="processFile" class="button py1 px2 m1">
@@ -28,25 +32,24 @@
 </template>
 
 <script>
-import papa from "papaparse";
 export default {
   data() {
     return {
-      campaignName: "",
+      campaignName: '',
       users: null,
       parsing: false,
       pushing: false,
-      stage: 0
+      stage: 0,
     };
   },
   methods: {
     processFile() {
       const file = this.$refs.file.files[0];
       this.users = this.$store
-        .dispatch("parse", {
-          file
+        .dispatch('parse', {
+          file,
         })
-        .then(users => {
+        .then((users) => {
           this.parsing = false;
           this.users = users;
         });
@@ -57,14 +60,14 @@ export default {
     },
     async commitNewCampaign() {
       this.pushing = true;
-      const id = await this.$store.dispatch("newCampaign", {
+      const id = await this.$store.dispatch('newCampaign', {
         users: this.users,
-        name: this.campaignName
+        name: this.campaignName,
       });
 
       this.$router.push(`/campaign/${id}/edit`);
-    }
-  }
+    },
+  },
 };
 </script>
 
