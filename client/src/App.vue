@@ -5,6 +5,7 @@
       <router-link to="/campaign">Campaigns</router-link>
       <!-- <router-link to="/campaign/new">new campaign</router-link> -->
       <router-link to="/report">Reports</router-link>
+      <router-link to="/settings">Settings</router-link>
     </nav>
     <router-view id="rootcontainer"/>
   </div>
@@ -56,6 +57,7 @@ nav a:hover {
   padding: 10px;
   box-sizing: border-box;
   margin-left: 260px;
+  margin-right: 60px;
   overflow-x: hidden;
   overflow-y: visible;
   height: 100vh;
