@@ -14,7 +14,7 @@ export const TwilioCredentialsRoutes = (app: express.Application) => {
         const user_id = req.user;
 
         try {
-            res.locals.twilioCredentials = await TwilioCredentials.find({ user_id });
+            res.locals.twilioCredentials = await TwilioCredentials.findOne({ user_id });
             next();
         } catch (e) {
             next(e);

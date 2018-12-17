@@ -167,7 +167,7 @@ const checkTwilioCredentials = async (req: Request, res: Response, next: any) =>
     return next();
   }
 
-  res.status(422).send("User has no twilio credentials");
+  res.status(422).send();
 };
 
 try {
