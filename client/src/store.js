@@ -68,7 +68,7 @@ export default new Vuex.Store({
       // commit new campaign
     },
     async fetchCampaigns(context) {
-      const campaigns = (await axiosInstance.get('api/campaigns')).data;
+      const campaigns = (await axiosInstance.get('api/campaign')).data;
       context.commit('RECEIVE_CAMPAIGNS', campaigns);
     },
     async sendCampaign(context, { campaign }) {
