@@ -55,9 +55,7 @@ export default new Vuex.Store({
         papa.parse(file, {
           complete: (data) => {
             const objlist = data.data.map(row => (row[0].length > 0 ? {
-              name: row[0],
-              phone: row[1],
-              email: row[2],
+              phone: row[0],
             } : null)).filter(item => item);
             resolve(objlist);
           },
