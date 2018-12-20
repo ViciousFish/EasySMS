@@ -50,7 +50,7 @@ export const TwilioCredentialsRoutes = (app: express.Application) => {
 
             const { account_sid, auth_token, phone } = req.body;
 
-            if (!account_sid || !auth_token) {
+            if (!account_sid || !auth_token || !phone) {
                 res.status(400).send();
             } else {
                 twilioCredentials.account_sid = account_sid;
