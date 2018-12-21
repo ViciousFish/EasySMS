@@ -23,7 +23,12 @@ export const TwilioCredentialsRoutes = (app: express.Application) => {
     }
 
     const maskCredentials = (unmasked: { phone: string, account_sid: string, auth_token: string }) => {
-        let masked = { ...unmasked };
+        const { phone, account_sid, auth_token } = unmasked;
+        let masked = { 
+            phone,
+            account_sid,
+            auth_token
+         };
 
         masked.account_sid = masked.account_sid
             .split("")
@@ -61,16 +66,21 @@ export const TwilioCredentialsRoutes = (app: express.Application) => {
                 twilioCredentials.auth_token = auth_token;
                 twilioCredentials.phone = phone;
 
-                if (process.env.RUN_MODE !== 'local') {
-                    try {
-                        const client = twilio(twilioCredentials.account_sid, twilioCredentials.auth_token);
-                    } catch (error) {
-                        res.status(422).send("Credentials invalid");
-                        return;
-                    }
+                try {
+                    const client = twilio(twilioCredentials.account_sid, twilioCredentials.auth_token);
+                    console.log(client);
+                } catch (error) {
+                    res.status(422).send("Credentials invalid");
+                    return;
                 }
 
-                await twilioCredentials.save();
+                
+                try {
+                    await twilioCredentials.save();
+                } catch (e) {
+                    res.status(400).send();
+                    return;
+                }
 
                 const campaigns = await Campaign.find({ user_id: req.user });
 
