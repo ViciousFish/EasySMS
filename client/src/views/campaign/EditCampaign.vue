@@ -1,7 +1,8 @@
 <template>
   <div class="flex flex-column">
     <h1>{{campaign.name}}</h1>
-    Messages
+    <h2>Messages</h2>
+    <p>Schedule as many messages as you want to be sent now or in the future!</p>
     <div class="">
       <message v-for="message in campaign.messages"
         :key="message.id"
@@ -35,7 +36,7 @@ export default {
   },
   methods: {
     next() {
-      this.$router.push(`/campaign/${this.id}/send`);
+      this.$router.push(`/${this.id}/send`);
     },
   },
 };

@@ -2,12 +2,16 @@
   <div class="flex flex-column">
     <transition name="fade">
       <div class="flex flex-column" v-if="!parsing && !users">
+        <label for="campaign-name">Campaign Name</label>
         <input class="p2 m1 h3 flex-auto"
+          id="campaign-name"
+          name="campaign-name"
           type="text"
           v-model="campaignName"
-          placeholder="Campaign Name"
+          placeholder="Something descriptive to help you find it in the future"
           autofocus/>
-        <input class="m1 h4" type="file" ref="file" accept="text/csv">
+        <label for="csv">Phone Number .csv</label>
+        <input name="csv" id="csv" class="m1 h4" type="file" ref="file" accept="text/csv">
         <div>
           <div @click="processFile" class="button py1 px2 m1">
             next
@@ -16,7 +20,7 @@
       </div>
       <div v-if="parsing">pretend this is a loading spinner</div>
       <div v-if="!parsing && users" class="m1">
-        Preview of user data:
+        Preview of phone numbers:
         <pre>{{users}}</pre>
         <div>
           <div @click="commitNewCampaign" class="button btn-success py1 px2 m1">
@@ -61,11 +65,11 @@ export default {
     async commitNewCampaign() {
       this.pushing = true;
       const id = await this.$store.dispatch('newCampaign', {
-        users: this.users,
+        users: this.users.map(user => ({ phone: user})),
         name: this.campaignName,
       });
 
-      this.$router.push(`/campaign/${id}/edit`);
+      this.$router.push(`/${id}/edit`);
     },
   },
 };

@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Home from './views/Home.vue';
 
 Vue.use(Router);
 
@@ -8,11 +7,6 @@ export default new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
-    {
-      path: '/',
-      name: 'Home',
-      component: Home,
-    },
     {
       path: '/report',
       name: 'Report',
@@ -24,7 +18,7 @@ export default new Router({
       component: () => import('./views/Settings.vue'),
     },
     {
-      path: '/campaign',
+      path: '/',
       component: () => import('./views/campaign/CampaignContainer.vue'),
       children: [
         {
@@ -38,13 +32,13 @@ export default new Router({
           component: () => import('./views/campaign/NewCampaign.vue'),
         },
         {
-          path: '/campaign/:id/edit',
+          path: '/:id/edit',
           name: 'EditCampaign',
           props: true,
           component: () => import('./views/campaign/EditCampaign.vue'),
         },
         {
-          path: '/campaign/:id/send',
+          path: '/:id/send',
           name: 'SendCampaign',
           props: true,
           component: () => import('./views/campaign/SendCampaign.vue'),

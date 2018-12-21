@@ -11,7 +11,7 @@ export default {
   methods: {
     async sendCampaign() {
       await this.$store.dispatch('sendCampaign', { campaign: this.id });
-      this.$router.push('/campaign');
+      this.$router.push('/');
     },
   },
   computed: {

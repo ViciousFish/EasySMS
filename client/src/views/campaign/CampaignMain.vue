@@ -1,14 +1,15 @@
 <template>
   <div class="flex flex-column">
+    <h1 class="m1">My Campaigns</h1>
     <router-link class="p3"
       v-for="campaign in Object.values(campaigns)"
       :key="campaign.id"
-      :to="`/campaign/${campaign.id}/edit`">
+      :to="`/${campaign.id}/edit`">
       <span class="status-created" v-if="campaign.status==='created'">.</span>
       <span class="status-in-progress" v-if="campaign.status==='in-progress'">.</span>
       {{campaign.name}}
     </router-link>
-    <router-link class="p3" to="/campaign/new">+ new</router-link>
+    <router-link class="p3" to="/new">+ new</router-link>
   </div>
 </template>
 
