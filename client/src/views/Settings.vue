@@ -5,6 +5,7 @@
     <a v-if="!twilioInformation.exists" href="https://twilio.com">Set up a twilio account</a>
     <form v-if="!loading" class="mt2 flex flex-column" @submit="submitCredentials">
       <h2 class="my1">Your twilio account information</h2>
+      <h6 v-if="twilioInformation.exists">For security purposes, we'll only show the last four characters of your Twilio credentials</h6>
       <div class="form-group flex flex-row flex-auto mt1">
         <label for="account_sid">Account ID</label>
         <input

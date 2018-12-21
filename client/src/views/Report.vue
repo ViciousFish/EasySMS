@@ -1,9 +1,12 @@
 <template>
   <div class="flex flex-column">
+    <h1 class="m1">Download Reports</h1>
     <div class="p3 flex report-row"
       v-for="campaign in Object.values(campaigns)"
       :key="campaign.id"
       :to="`/campaign/${campaign.id}/edit`">
+      <span class="status-created" v-if="campaign.status==='created'">.</span>
+      <span class="status-in-progress" v-if="campaign.status==='in-progress'">.</span>
       <span class="block flex-auto">{{campaign.name}}</span>
       <a :href="urljoin(API_URL, 'campaign', campaign.id, 'responses')"
         class="button px1 mr1">Response Report</a>
