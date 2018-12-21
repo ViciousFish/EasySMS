@@ -2,18 +2,36 @@
   <div id="app">
     <nav>
       <!-- <router-link to="/">Home</router-link> -->
-      <router-link to="/campaign">Campaigns</router-link>
+      <router-link v-if="authenticated" to="/campaign">Campaigns</router-link>
       <!-- <router-link to="/campaign/new">new campaign</router-link> -->
-      <router-link to="/report">Reports</router-link>
-      <router-link to="/settings">Settings</router-link>
+      <router-link v-if="authenticated" to="/report">Reports</router-link>
+      <router-link v-if="authenticated" to="/settings">Settings</router-link>
     </nav>
     <router-view id="rootcontainer"/>
   </div>
 </template>
 
 <script>
+import axios,{ AxiosResponse } from 'axios';
+import { API_URL } from './config.js';
 export default {
-  mounted() {}
+  mounted() {
+    axios.get(`${API_URL}/status`, {withCredentials: true})
+      .then((response) =>{
+        if (response.status === 200){
+          this.$store.commit('setAuthenticated', true);
+        } else {
+          this.$store.dispatch('login');
+        }
+      }).catch((response) => {
+        this.$store.dispatch('login');
+      })
+  },
+  computed: {
+    authenticated() {
+      return this.$store.state.authenticated;
+    }
+  }
 };
 </script>
 

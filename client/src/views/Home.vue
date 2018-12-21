@@ -1,12 +1,17 @@
 <template>
   <div class="home">
-    <h1 class="m1">Good Evening.</h1>
+    <h1 class="m1">{{authenticated ? "Good Evening" : "Authenticating..."}}.</h1>
   </div>
 </template>
 
 <script>
 export default {
   name: 'home',
+  computed: {
+    authenticated() {
+      return this.$store.state.authenticated;
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>

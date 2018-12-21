@@ -173,6 +173,10 @@ const checkTwilioCredentials = async (req: Request, res: Response, next: any) =>
 try {
   app.use(secured);
 
+  app.get('/api/status', (req: Request, res: Response) => {
+    res.status(200).send();
+  });
+
   TwilioCredentialsRoutes(app);
 
   app.use(checkTwilioCredentials);
