@@ -5,11 +5,13 @@ import axios from 'axios';
 import papa from 'papaparse';
 import { API_URL } from './config';
 import router from './router';
+// import * as R from 'ramda';
 
 Vue.use(Vuex);
 
 const HOME_URL = API_URL.substring(0, API_URL.length - 3);
 const axiosInstance = axios.create({ withCredentials: true, baseURL: HOME_URL });
+
 
 axiosInstance.interceptors.response.use(null, ({ response }) => {
   if (response.status === 401) {
@@ -17,7 +19,7 @@ axiosInstance.interceptors.response.use(null, ({ response }) => {
   }
   if (response.status === 403) {
     // TODO: implement this
-    console.log("User has no twilio credentials");
+    // console.log("User has no twilio credentials");
     router.push('/settings');
   }
   return response;
@@ -28,7 +30,12 @@ export default new Vuex.Store({
     campaignMap: {},
     messageMap: {},
     inputcsv: {},
-    twilioInformation: {},
+    twilioInformation: {
+      exists: false,
+      account_sid: '',
+      auth_token: '',
+      phone: '',
+    },
   },
   mutations: {
     newCampaign(state, campaign) {
@@ -98,12 +105,19 @@ export default new Vuex.Store({
     async fetchTwilio(context) {
       const response = (await axiosInstance.get('api/twiliocredentials'));
       console.log(response);
-      const twilioInformation = {
-        exists: response.status === 404 ? false : true,
+      const twilioInformation = (response.status === 404) ? {
+        exists: false,
+      } : {
+        exists: true,
         ...response.data,
       };
-      console.log(twilioInformation);
+      console.log('twilioInformation', twilioInformation);
       context.commit('RECEIVE_TWILIO_INFORMATION', twilioInformation);
+    },
+    async submitTwilioCredentials(context, twilioInformation) {
+      console.log('abt to send', twilioInformation);
+      const response = await axiosInstance.post('api/twiliocredentials', twilioInformation);
+      console.log(response);
     },
   },
 });
