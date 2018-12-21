@@ -22,24 +22,28 @@ export const TwilioCredentialsRoutes = (app: express.Application) => {
         }
     }
 
+    const maskCredentials = (unmasked: { phone: string, account_sid: string, auth_token: string }) => {
+        let masked = { ...unmasked };
+
+        masked.account_sid = masked.account_sid
+            .split("")
+            .map((val: string, index: number) => index < masked.account_sid.length - 4 ? "*" : val)
+            .join("");
+
+        masked.auth_token = masked.auth_token
+            .split("")
+            .map((val: string, index: number) => index < masked.auth_token.length - 4 ? "*" : val)
+            .join("");
+
+        return masked;
+    }
+
     router.route('/')
         .get(getCredentials, async (req: Request, res: Response) => {
             if (!res.locals.twilioCredentials) {
                 res.status(404).send();
             } else {
-                let maskedCredentials = res.locals.twilioCredentials;
-
-                maskedCredentials.account_sid = maskedCredentials.account_sid
-                    .split("")
-                    .map((val: string, index: number) => index < maskedCredentials.account_sid.length - 4 ? "*" : val)
-                    .join("");
-
-                maskedCredentials.auth_token = maskedCredentials.auth_token
-                    .split("")
-                    .map((val: string, index: number) => index < maskedCredentials.auth_token.length - 4 ? "*" : val)
-                    .join("");
-
-                console.log(maskedCredentials);
+                let maskedCredentials = maskCredentials(res.locals.twilioCredentials);
                 res.status(200).send(maskedCredentials);
             }
         }).post(getCredentials, async (req: Request, res: Response) => {
@@ -82,7 +86,7 @@ export const TwilioCredentialsRoutes = (app: express.Application) => {
                         campaign.save();
                 })
 
-                res.status(201).send();
+                res.status(201).send(maskCredentials(twilioCredentials));
             }
         }).delete(getCredentials, async (req: Request, res: Response) => {
             if (!res.locals.twilioCredentials) {
