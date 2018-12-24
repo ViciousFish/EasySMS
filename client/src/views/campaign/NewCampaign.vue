@@ -55,6 +55,10 @@ export default {
         return;
       }
       const file = this.$refs.file.files[0];
+      if (!file){
+        return;
+      }
+
       this.users = this.$store
         .dispatch('parse', {
           file,
@@ -62,6 +66,8 @@ export default {
         .then((users) => {
           this.parsing = false;
           this.users = users;
+        }).catch((err) => {
+          this.parsing = false;
         });
       this.parsing = true;
     },

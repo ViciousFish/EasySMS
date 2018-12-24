@@ -1,11 +1,11 @@
 <template>
   <div class="flex-auto flex flex-column">
     <ul class="m1 h5 list-reset" v-if="breadcrumb">
-      <li :class="{'breadcrumb-active':stage1}"><span class="number">1</span> import users</li>
+      <li :class="{'breadcrumb-active':stage1}"><span class="number">1</span> Import Phone Numbers</li>
       <span class="flex-auto line"></span>
-      <li :class="{'breadcrumb-active':stage2}"><span class="number">2</span>configure messages</li>
+      <li :class="{'breadcrumb-active':stage2}"><span class="number">2</span>Schedule Messages</li>
       <span class="flex-auto line"></span>
-      <li :class="{'breadcrumb-active':stage3}"><span class="number">3</span> press the button</li>
+      <li :class="{'breadcrumb-active':stage3}"><span class="number">3</span> Start Campaign</li>
     </ul>
     <transition name="slide" mode="out-in">
       <router-view></router-view>
