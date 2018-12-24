@@ -9,13 +9,16 @@
           type="text"
           v-model="campaignName"
           placeholder="Something descriptive to help you find it in the future"
-          autofocus/>
+          autofocus
+          required/>
         <label for="csv">Phone Number .csv</label>
         <input name="csv" id="csv" class="m1 h4" type="file" ref="file" accept="text/csv">
         <div>
-          <div @click="processFile" class="button py1 px2 m1">
-            next
-          </div>
+          <transition name="fade">
+            <div v-if="this.campaignName != ''" @click="processFile" class="button py1 px2 m1">
+              next
+            </div>
+          </transition>
         </div>
       </div>
       <div v-if="parsing">pretend this is a loading spinner</div>
@@ -48,6 +51,9 @@ export default {
   },
   methods: {
     processFile() {
+      if (this.campaignName === '' || this.campaignName === null){
+        return;
+      }
       const file = this.$refs.file.files[0];
       this.users = this.$store
         .dispatch('parse', {

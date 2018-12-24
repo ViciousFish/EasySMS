@@ -25,7 +25,20 @@ const createCampaign = async (req: Request, res: Response, next: any) => {
     let name = req.body.name;
     let users: IUser[] = [];
 
+    if (!name || !req.body.users){
+        res.status(400).send({
+            message: "Missing required data"
+        });
+        return;
+    }
+
     for (let user of req.body.users) {
+        if (!user.phone) {
+            res.status(400).send({
+                message: "Missing user phone number"
+            });
+            return;
+        }
         users.push({
             phone: user.phone
         });

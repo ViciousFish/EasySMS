@@ -13,6 +13,7 @@
       <a :href="urljoin(API_URL, 'campaign', campaign.id, 'deliveries')"
         class="button px1">Delivery Report</a>
     </div>
+    <h2>No campaigns to report on. <router-link to="/">Click here to create one!</router-link></h2>
   </div>
 </template>
 
