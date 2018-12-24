@@ -7,7 +7,7 @@
       <router-link v-if="authenticated" to="/report">Reports</router-link>
       <router-link v-if="authenticated" to="/settings">Settings</router-link>
     </nav>
-    <router-view id="rootcontainer"/>
+    <router-view v-if="authenticated" id="rootcontainer"/>
   </div>
 </template>
 

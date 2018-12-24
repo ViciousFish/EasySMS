@@ -76,3 +76,5 @@ server/dist
 server/public
 
 \.DS_Store
+
+users\.csv

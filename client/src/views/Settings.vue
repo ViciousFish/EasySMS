@@ -39,6 +39,9 @@
       <div class="form-group mt1">
         <input type="submit" class="button btn-success py1 px2 my1" value="Save">
       </div>
+      <transition name="fade">
+        <p v-if="saved">Saved!</p>
+      </transition>
     </form>
   </div>
 </template>
@@ -71,6 +74,11 @@ export default {
       // console.log("submit", this.twilioInformation);
       this.$store.dispatch('submitTwilioCredentials', this.twilioInformation);
     }
+  },
+  computed: {
+    saved() {
+      return this.$store.state.savedCredentials;
+    }
   }
 };
 </script>
@@ -78,5 +86,12 @@ export default {
 <style scoped>
 form {
   max-width: 560px;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>

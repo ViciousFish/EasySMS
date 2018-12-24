@@ -37,6 +37,7 @@ export default new Vuex.Store({
       phone: '',
     },
     authenticated: false,
+    savedCredentials: false,
   },
   mutations: {
     newCampaign(state, campaign) {
@@ -55,6 +56,9 @@ export default new Vuex.Store({
     },
     setAuthenticated(state, isAuthenticated) {
       state.authenticated = isAuthenticated; // eslint-disable-line
+    },
+    setSavingCredentials(state, isSaving) {
+      state.savedCredentials = isSaving; // eslint-disable-line
     },
   },
   getters: {
@@ -122,6 +126,10 @@ export default new Vuex.Store({
       console.log('abt to send', twilioInformation);
       const response = await axiosInstance.post('api/twiliocredentials', twilioInformation);
       console.log(response);
+      context.commit('setSavingCredentials', true);
+      setTimeout(() => {
+        context.commit('setSavingCredentials', false);
+      }, 2000);
     },
     async login() {
       window.location = `${HOME_URL}login?returnTo=${window.location}`;
