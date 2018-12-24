@@ -1,9 +1,7 @@
 <template>
   <div id="app">
     <nav>
-      <!-- <router-link to="/">Home</router-link> -->
       <router-link v-if="authenticated" to="/">Campaigns</router-link>
-      <!-- <router-link to="/campaign/new">new campaign</router-link> -->
       <router-link v-if="authenticated" to="/report">Reports</router-link>
       <router-link v-if="authenticated" to="/settings">Settings</router-link>
     </nav>
