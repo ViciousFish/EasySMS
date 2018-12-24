@@ -8,12 +8,12 @@
       <span class="status-created" v-if="campaign.status==='created'">.</span>
       <span class="status-in-progress" v-if="campaign.status==='in-progress'">.</span>
       <span class="block flex-auto">{{campaign.name}}</span>
-      <a :href="urljoin(API_URL, 'campaign', campaign.id, 'responses')"
+      <a :href="urljoin(API_URL, 'campaign', campaign.id, 'responses/file')"
         class="button px1 mr1">Response Report</a>
-      <a :href="urljoin(API_URL, 'campaign', campaign.id, 'deliveries')"
+      <a :href="urljoin(API_URL, 'campaign', campaign.id, 'deliveries/file')"
         class="button px1">Delivery Report</a>
     </div>
-    <h2>No campaigns to report on. <router-link to="/">Click here to create one!</router-link></h2>
+    <h2 v-if="!campaigns">No campaigns to report on. <router-link to="/">Click here to create one!</router-link></h2>
   </div>
 </template>
 

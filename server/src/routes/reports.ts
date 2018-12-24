@@ -4,7 +4,7 @@ import { Delivery } from '../models/Delivery';
 
 const routerPath = '/api/campaign';
 
-const getCampaignDeliveries = async (req: Request, res: Response, next: any) => {
+const getCampaignDeliveriesFile = async (req: Request, res: Response, next: any) => {
     const { id: campaign_id } = res.locals.campaign; 
     let deliveries = await Delivery.find({
         campaign: campaign_id
@@ -30,7 +30,25 @@ const getCampaignDeliveries = async (req: Request, res: Response, next: any) => 
     res.send(csvString).status(200);
 }
 
-const getCampaignResponses = async (req: Request, res: Response, next: any) => {
+const getCampaignDeliveries = async (req: Request, res: Response, next: any) => {
+    const { id: campaign_id } = res.locals.campaign; 
+    let deliveries = await Delivery.find({
+        campaign: campaign_id
+    });
+    deliveries = deliveries.map(delivery => {
+        const tmp = delivery.toObject();
+        delete tmp.__v;
+        return tmp;
+    });
+    if (deliveries == null || deliveries.length == 0) {
+        res.status(404).send({ msg: "No deliveries to report!"});
+        return;
+    }
+
+    res.send(deliveries).status(200);
+}
+
+const getCampaignResponsesFile = async (req: Request, res: Response, next: any) => {
     const { campaign } = res.locals;
     const responses = [];
     for (const message of campaign.messages) {
@@ -60,6 +78,26 @@ const getCampaignResponses = async (req: Request, res: Response, next: any) => {
     res.send(csvString).status(200);
 }
 
+const getCampaignResponses = async (req: Request, res: Response, next: any) => {
+    const { campaign } = res.locals;
+    const responses = [];
+    for (const message of campaign.messages) {
+        for (const response of message.responses) {
+            responses.push({
+                user: response.user,
+                campaign: campaign.id,
+                date: response.date,
+                message: message.text,
+                response: response.text
+            })
+        }
+    }
+    if (responses == null || responses.length == 0) {
+        res.status(404).send({ msg: "No responses to report!"})
+        return;
+    }
+    res.send(responses).status(200);
+}
 
 export const ReportsRoutes = (app: express.Application) => {
 
@@ -68,7 +106,9 @@ export const ReportsRoutes = (app: express.Application) => {
     router.param('campaign_id', getCampaignAndValidateAuth);
 
     router.get('/:campaign_id/responses', getCampaignResponses);
+    router.get('/:campaign_id/responses/file', getCampaignResponsesFile);
     router.get('/:campaign_id/deliveries', getCampaignDeliveries);
+    router.get('/:campaign_id/deliveries/file', getCampaignDeliveriesFile);
 
     app.use(routerPath, router);
 };
