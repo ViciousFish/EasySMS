@@ -1,7 +1,7 @@
 {
   "version": 1,
   "type": "docker",
-  "name":"ohack2018",
+  "name":"easysms-app",
   "env": {
     "MONGO_URL":"@mongo-url",
     "API_URL": "https://easysms-app.now.sh/api",
