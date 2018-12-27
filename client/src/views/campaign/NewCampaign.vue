@@ -51,11 +51,11 @@ export default {
   },
   methods: {
     processFile() {
-      if (this.campaignName === '' || this.campaignName === null){
+      if (this.campaignName === '' || this.campaignName === null) {
         return;
       }
       const file = this.$refs.file.files[0];
-      if (!file){
+      if (!file) {
         return;
       }
 
@@ -66,7 +66,7 @@ export default {
         .then((users) => {
           this.parsing = false;
           this.users = users;
-        }).catch((err) => {
+        }).catch(() => {
           this.parsing = false;
         });
       this.parsing = true;
@@ -77,7 +77,7 @@ export default {
     async commitNewCampaign() {
       this.pushing = true;
       const id = await this.$store.dispatch('newCampaign', {
-        users: this.users.map(user => ({ phone: user})),
+        users: this.users.map(user => ({ phone: user })),
         name: this.campaignName,
       });
 

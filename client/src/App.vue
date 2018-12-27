@@ -11,34 +11,34 @@
 </template>
 
 <script>
-import axios,{ AxiosResponse } from 'axios';
-import { API_URL } from './config.js';
+import axios from 'axios';
+import { API_URL } from './config';
 
 const HOME_URL = API_URL.substring(0, API_URL.length - 3);
 
 export default {
   mounted() {
-    axios.get(`${API_URL}/status`, {withCredentials: true})
-      .then((response) =>{
-        if (response.status === 200){
+    axios.get(`${API_URL}/status`, { withCredentials: true })
+      .then((response) => {
+        if (response.status === 200) {
           this.$store.commit('setAuthenticated', true);
         } else {
           this.$store.dispatch('login');
         }
-      }).catch((response) => {
+      }).catch(() => {
         this.$store.dispatch('login');
-      })
+      });
   },
   computed: {
     authenticated() {
       return this.$store.state.authenticated;
-    }
+    },
   },
   methods: {
     logout() {
       window.location = `${HOME_URL}logout`;
-    }
-  }
+    },
+  },
 };
 </script>
 

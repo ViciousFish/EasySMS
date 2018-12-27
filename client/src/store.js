@@ -112,20 +112,16 @@ export default new Vuex.Store({
     },
     async fetchTwilio(context) {
       const response = (await axiosInstance.get('api/twiliocredentials'));
-      console.log(response);
       const twilioInformation = (response.status === 404) ? {
         exists: false,
       } : {
         exists: true,
         ...response.data,
       };
-      console.log('twilioInformation', twilioInformation);
       context.commit('RECEIVE_TWILIO_INFORMATION', twilioInformation);
     },
     async submitTwilioCredentials(context, twilioInformation) {
-      console.log('abt to send', twilioInformation);
-      const response = await axiosInstance.post('api/twiliocredentials', twilioInformation);
-      console.log(response);
+      await axiosInstance.post('api/twiliocredentials', twilioInformation);
       context.commit('setSavingCredentials', true);
       setTimeout(() => {
         context.commit('setSavingCredentials', false);

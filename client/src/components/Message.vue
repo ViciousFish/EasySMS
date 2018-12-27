@@ -8,7 +8,10 @@
     <a @click="edit" v-if="!editing && message===null">+ new</a>
     <form @submit="save" class="flex flex-auto" v-if="editing">
       <label class="ml1 mr1" for="date">Date</label>
-      <datepicker name="date" v-model="temp.date" input-class="p1 mr1" placeholder="date to send"></datepicker>
+      <datepicker name="date"
+        v-model="temp.date"
+        input-class="p1 mr1"
+        placeholder="date to send"></datepicker>
       <label class="ml1 mr1" for="hour">Hour</label>
       <select v-model="hour" name="hour">
         <option value="0" selected>0</option>
@@ -122,7 +125,7 @@ export default {
         date: null,
       },
       hour: '0',
-      minute: '0'
+      minute: '0',
     };
   },
   computed: {
