@@ -1,9 +1,9 @@
 <template>
   <div id="app">
-    <nav>
-      <router-link v-if="authenticated" to="/">Campaigns</router-link>
-      <router-link v-if="authenticated" to="/report">Reports</router-link>
-      <router-link v-if="authenticated" to="/settings">Settings</router-link>
+    <nav v-if="authenticated">
+      <router-link to="/">Campaigns</router-link>
+      <router-link to="/report">Reports</router-link>
+      <router-link to="/settings">Settings</router-link>
       <a v-on:click="logout">Logout</a>
     </nav>
     <router-view v-if="authenticated" id="rootcontainer"/>
