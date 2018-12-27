@@ -60,7 +60,7 @@ app.use(session({
     url: mongoUrl
   }),
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false
 }));
 
 
@@ -122,8 +122,14 @@ app.get('/login/callback', (req: Request, res: Response, next: any) => {
 });
 
 app.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('/');
+  req.session.destroy((err: any) => {
+    if (err){
+      console.error("Failed to destory session", err);
+    }
+    req.logOut();
+    res.clearCookie('user_sid');
+    res.redirect(`https://${process.env.AUTH0_DOMAIN}/v2/logout?returnTo=${encodeURIComponent(process.env.RUN_MODE === 'local' ? 'http://localhost:8080' : 'https://easysms.now.sh')}`);
+  });
 });
 
 // In local mode, we don't want to enforce this

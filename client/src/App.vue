@@ -4,6 +4,7 @@
       <router-link v-if="authenticated" to="/">Campaigns</router-link>
       <router-link v-if="authenticated" to="/report">Reports</router-link>
       <router-link v-if="authenticated" to="/settings">Settings</router-link>
+      <a v-on:click="logout">Logout</a>
     </nav>
     <router-view v-if="authenticated" id="rootcontainer"/>
   </div>
@@ -12,6 +13,9 @@
 <script>
 import axios,{ AxiosResponse } from 'axios';
 import { API_URL } from './config.js';
+
+const HOME_URL = API_URL.substring(0, API_URL.length - 3);
+
 export default {
   mounted() {
     axios.get(`${API_URL}/status`, {withCredentials: true})
@@ -28,6 +32,11 @@ export default {
   computed: {
     authenticated() {
       return this.$store.state.authenticated;
+    }
+  },
+  methods: {
+    logout() {
+      window.location = `${HOME_URL}logout`;
     }
   }
 };
