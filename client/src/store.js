@@ -3,7 +3,7 @@ import Vuex from 'vuex';
 import urljoin from 'url-join';
 import axios from 'axios';
 import papa from 'papaparse';
-import { API_URL } from './config';
+import { API_URL, BYPASS_TWILIO_CHECK } from './config';
 import router from './router';
 // import * as R from 'ramda';
 
@@ -17,7 +17,7 @@ axiosInstance.interceptors.response.use(null, ({ response }) => {
   if (response.status === 401) {
     window.location = `${HOME_URL}login?returnTo=${window.location}`;
   }
-  if (response.status === 403) {
+  if (!BYPASS_TWILIO_CHECK && response.status === 403) {
     // TODO: implement this
     // console.log("User has no twilio credentials");
     router.push('/settings');
