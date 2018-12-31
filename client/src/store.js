@@ -71,7 +71,8 @@ export default new Vuex.Store({
           complete: (data) => {
             const objlist = data.data
               .map(row => (row[0].length > 0 ? row[0] : null))
-              .filter(item => item);
+              .filter(item => item) // idk apparently this line is necessary
+              .filter((value, index, self) => self.indexOf(value) === index); // remove duplicates
             resolve(objlist);
           },
           error: (e) => {

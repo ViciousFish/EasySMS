@@ -8,11 +8,13 @@
           name="campaign-name"
           type="text"
           v-model="campaignName"
-          placeholder="Something descriptive to help you find it in the future"
+          placeholder="Something descriptive to help you find the campaign in the future"
           autofocus
           required/>
         <label for="csv">Phone Number .csv</label>
         <input name="csv" id="csv" class="m1 h4" type="file" ref="file" accept="text/csv">
+        <p>Each line of the .csv should contain a phone number in the first column in the <a href="https://www.twilio.com/docs/glossary/what-e164">E.164 format</a>.
+          All other infomation in each row will be ignored! We'll show you a sample of the data before starting the campaign.</p>
         <div>
           <transition name="fade">
             <div v-if="this.campaignName != ''" @click="processFile" class="button py1 px2 m1">
@@ -24,7 +26,7 @@
       <div v-if="parsing">pretend this is a loading spinner</div>
       <div v-if="!parsing && users" class="m1">
         Preview of phone numbers:
-        <pre>{{users}}</pre>
+        <pre>{{users.slice(0,5)}}</pre>
         <div>
           <div @click="commitNewCampaign" class="button btn-success py1 px2 m1">
             My data looks good
