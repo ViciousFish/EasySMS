@@ -149,7 +149,7 @@ app.post('/deliveryupdate', twilioWebhookMiddleware, (req: Request, res: Respons
 app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Response) => {
   const user_identifier = req.body.From;
   
-  Delivery.findOne({ user: user_identifier }).sort({ date: -1 }).limit(1)
+  Delivery.findOne({ user: user_identifier, from: req.body.to }).sort({ date: -1 }).limit(1)
   .then(async (delivery) => {
     const campaign = await Campaign.findById(delivery.campaign);
     const index = await indexOfMessageSearch(campaign.messages, delivery.message);

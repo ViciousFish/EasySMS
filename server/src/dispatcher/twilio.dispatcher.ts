@@ -30,7 +30,8 @@ export class TwilioDispatcher {
                 message: message.uuid,
                 messageBody: message.text,
                 date: new Date(),
-                status: error
+                status: error,
+                from: this.phone
                 });
                 delivery.save()
                     .then(()=>{})

@@ -34,7 +34,8 @@ export async function startSendingMessage(campaign_id: string, message_id: strin
             message: message.uuid,
             messageBody: message.text,
             date: new Date(),
-            status: 'Success'
+            status: 'Success',
+            from: campaignTwilioCredentials.phone
           });
           delivery.save();
         })
@@ -84,7 +85,8 @@ export async function resumeSendingMessage(campaign_id: string, message_id: stri
               message: message.uuid,
               messageBody: message.text,
               date: new Date(),
-              status: 'Success'
+              status: 'Success',
+              from: campaignTwilioCredentials.phone
             });
             delivery.save();
           })

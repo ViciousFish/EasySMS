@@ -27,6 +27,10 @@ const DeliverySchema: Schema = new Schema({
     type: String,
     required: true,
     default: 'Success'
+  },
+  from: {
+    type: String,
+    required: true
   }
 });
 
