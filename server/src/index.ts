@@ -55,7 +55,11 @@ app.use(cors({
 app.use(session({
   name: 'user_sid',
   secret,
-  cookie: {},
+  cookie: {
+    maxAge: 1000*60*60*24*30, //30 days
+    httpOnly: true,
+    secure: process.env.RUN_MODE !== 'local'
+  },
   store: new MongoStore({
     url: mongoUrl
   }),
