@@ -30,6 +30,8 @@ import { CampaignRoutes } from './routes/campaign';
 import { ReportsRoutes } from './routes/reports';
 import { TwilioCredentialsRoutes } from './routes/twiliocredentials';
 import { TwilioCredentials } from './models/TwilioCredentials';
+import { secured } from './middleware/auth';
+import { checkTwilioCredentials } from './middleware/twilio';
 
 
 const MongoStore = require('connect-mongo')(session);
@@ -164,21 +166,7 @@ app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Resp
   });
 });
 
-const secured = (req: Request, res: Response, next: any) => {
-  if (req.user) {
-    return next();
-  }
-  res.status(401).send();
-}
 
-const checkTwilioCredentials = async (req: Request, res: Response, next: any) => {
-  const twiliocredentials = await TwilioCredentials.findOne({ user_id: req.user });
-  if (twiliocredentials){
-    return next();
-  }
-
-  res.status(403).send();
-};
 
 try {
   app.use(secured);
