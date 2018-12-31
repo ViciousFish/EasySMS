@@ -43,6 +43,12 @@ const createCampaign = async (req: Request, res: Response, next: any) => {
             phone: user.phone
         });
     }
+    users = users
+        .map(item => { 
+            item.phone.replace(/[\(\)\-\s]/g, ''); // remove parentheses, whitespace and dashes
+            return item;
+        }) 
+        .filter((value, index, self) => self.indexOf(value) === index); // remove duplicates
 
     let newCampaignObject = new Campaign({
         name,

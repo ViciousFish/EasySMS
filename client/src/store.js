@@ -72,6 +72,8 @@ export default new Vuex.Store({
             const objlist = data.data
               .map(row => (row[0].length > 0 ? row[0] : null))
               .filter(item => item) // idk apparently this line is necessary
+              //  remove parentheses, whitespace and dashes
+              .map(item => item.replace(/[\(\)\-\s]/g, '')) // eslint-disable-line no-useless-escape
               .filter((value, index, self) => self.indexOf(value) === index); // remove duplicates
             resolve(objlist);
           },
