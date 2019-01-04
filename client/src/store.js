@@ -17,9 +17,7 @@ axiosInstance.interceptors.response.use(null, ({ response }) => {
   if (response.status === 401) {
     window.location = `${HOME_URL}login?returnTo=${window.location}`;
   }
-  if (!BYPASS_TWILIO_CHECK && response.status === 403) {
-    // TODO: implement this
-    // console.log("User has no twilio credentials");
+  if (response.status === 403) {
     router.push('/settings');
   }
   return response;
