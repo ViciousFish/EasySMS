@@ -59,8 +59,7 @@ app.use(session({
   secret,
   cookie: {
     maxAge: 1000*60*60*24*30, //30 days
-    httpOnly: true,
-    secure: process.env.RUN_MODE !== 'local'
+    httpOnly: true
   },
   store: new MongoStore({
     url: mongoUrl
@@ -195,7 +194,7 @@ try {
     console.log(err);
 
     if (err) {
-      res.status(err.status).send(err.message);
+      res.status(err.status || 500).send(err.message);
       return;
     }
     res.status(200).sendFile(path.resolve(__dirname + '../../public/index.html'));
