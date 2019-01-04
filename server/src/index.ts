@@ -79,15 +79,18 @@ const strategy = new Auth0Strategy({
     process.env.AUTH0_CALLBACK_URL || 'http://localhost:3000/login/callback'
 },
   function (accessToken: any, refreshToken: any, extraParams: any, profile: any, done: any) {
+    console.log("PROFILE", profile);
     return done(null, profile.id);
   })
 
 
 passport.serializeUser(function (user_id: string, done) {
+  console.log("Serialize", user_id);
   done(null, user_id);
 });
 
 passport.deserializeUser(function (user_id: string, done) {
+  console.log("Deserialize", user_id);
   done(null, user_id);
 });
 
