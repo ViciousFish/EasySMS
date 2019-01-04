@@ -112,10 +112,10 @@ app.get('/login/callback', (req: Request, res: Response, next: any) => {
     if (err) {
       return next(err);
     }
+    console.log("USER", user);
     if (!user) {
       return res.redirect('/login');
     }
-    console.log("USER", user);
     req.logIn(user, (error) => {
       if (err) {
         return next(error);
