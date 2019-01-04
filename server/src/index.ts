@@ -121,7 +121,8 @@ app.get('/login/callback', (req: Request, res: Response, next: any) => {
       return res.redirect('/login');
     }
     req.logIn(user, (error) => {
-      if (err) {
+      if (error) {
+        console.error("Failed to log user in", error);
         return next(error);
       }
       const returnTo = req.session.returnTo;
