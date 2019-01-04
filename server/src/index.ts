@@ -113,10 +113,11 @@ app.get('/login', (req, res, next) => {
 app.get('/login/callback', (req: Request, res: Response, next: any) => {
   passport.authenticate('auth0', (err: any, user: any, info: any) => {
     if (err) {
+      console.error("auth error", err);
       return next(err);
     }
     console.log("USER", user);
-    if (!user) {
+    if (user == undefined || user == null) {
       return res.redirect('/login');
     }
     req.logIn(user, (error) => {
