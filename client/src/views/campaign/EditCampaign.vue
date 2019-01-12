@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-column">
+  <div v-if="campaign" class="flex flex-column">
     <h1>{{campaign.name}}</h1>
     <h2>Messages</h2>
     <p>Schedule as many messages as you want to be sent now or in the future!</p>
