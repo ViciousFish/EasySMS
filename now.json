@@ -10,5 +10,12 @@
     "AUTH0_CLIENT_SECRET":"@auth0-client-secret",
     "AUTH0_CALLBACK_URL":"@auth0-callback-url"
   },
-  "alias": "https://easysms-app.now.sh"
+  "alias": "https://easysms-app.now.sh",
+  "features": { "cloud": "v1" },
+  "scale": {
+    "sfo1": {
+        "min": 1,
+        "max": 1
+    }
+  }
 }
