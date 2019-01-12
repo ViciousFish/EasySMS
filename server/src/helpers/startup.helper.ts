@@ -10,12 +10,15 @@ export async function startup() {
       if (message.status != 'complete'){
         if (message.status == 'started') {
           // resume sending
+          console.log("Resuming sending of Campaign, message", campaign.id, message.uuid);
           resumeSendingMessage(campaign.id, message.uuid);
         } else if (message.date <= Date.now()) {
           // start sending
+          console.log("Starting sending of Campaign, message", campaign.id, message.uuid);
           startSendingMessage(campaign.id, message.uuid);
         } else {
           // set a timeout for sending
+          console.log("Scheduling Campaign, message for time", campaign.id, message.uuid, message.date);
           MessageScheduler.scheduleMessage(campaign.id, message.uuid, message.date);
         }
       }
