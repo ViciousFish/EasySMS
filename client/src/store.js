@@ -42,6 +42,7 @@ export default new Vuex.Store({
       Vue.set(state.campaignMap, campaign.id, campaign);
     },
     RECEIVE_CAMPAIGNS(state, campaigns) {
+      state.campaignMap = {}; // eslint-disable-line
       campaigns.forEach((campaign) => {
         Vue.set(state.campaignMap, campaign.id, campaign);
       });
@@ -100,6 +101,14 @@ export default new Vuex.Store({
     },
     async sendCampaign(context, { campaign }) {
       return axiosInstance.post(urljoin('api/campaign', campaign, 'start'), {});
+    },
+    async deleteCampaign({ dispatch }, campaignId) {
+      axiosInstance.delete(urljoin('api/campaign/', campaignId))
+        .then(() => {
+          dispatch('fetchCampaigns');
+        }).catch(() => {
+
+        });
     },
     async newMessage(context, { message, campaign }) {
       const payload = {

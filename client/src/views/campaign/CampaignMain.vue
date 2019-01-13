@@ -8,6 +8,14 @@
       <span class="status-created" v-if="campaign.status==='created'">.</span>
       <span class="status-in-progress" v-if="campaign.status==='in-progress'">.</span>
       {{campaign.name}}
+      <button
+        v-on:click="(e) => {
+          e.preventDefault();
+          deleteCampaign(campaign.id);
+        }"
+        style="background-color:#f64949;float:right;border-radius:50%;border:none;width:25px;height:25px;">
+        X
+      </button>
     </router-link>
     <router-link class="p3" to="/new">+ new</router-link>
   </div>
@@ -23,6 +31,11 @@ export default {
       return this.$store.state.campaignMap;
     },
   },
+  methods: {
+    deleteCampaign(campaignId) {
+      this.$store.dispatch('deleteCampaign', campaignId);
+    }
+  }
 };
 </script>
 
