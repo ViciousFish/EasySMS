@@ -139,6 +139,21 @@ const updateMessage = async (req: Request, res: Response, next: any) => {
         res.status(404).send();
         return;
     }
+
+    if (campaign.status === 'completed'){
+        res.status(400).send({
+            message: "Campaign is over"
+        });
+        return;
+    }
+
+    if (campaign.status !== 'created' && msgToUpdate.date < Date.now()){
+        res.status(400).send({
+            message: "Message date is in the past"
+        });
+        return;
+    }
+
     if (req.body.text) {
         msgToUpdate.text = req.body.text;
     }
@@ -148,6 +163,11 @@ const updateMessage = async (req: Request, res: Response, next: any) => {
 
     if (msgToUpdate.status == 'needs-rescheduling'){
         msgToUpdate.status = 'pending';
+    }
+
+    if (campaign.status === 'in-progress'){
+        MessageScheduler.removeScheduledMessage(msgToUpdate.uuid);
+        MessageScheduler.scheduleMessage(campaign.id, msgToUpdate.uuid, msgToUpdate.date);
     }
 
     await campaign.save();
