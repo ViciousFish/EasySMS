@@ -25,11 +25,9 @@ export default {
     return { API_URL };
   },
   mounted() {
-    console.log("Fetching data");
     this.$store.dispatch('getCampaignsWithReports');
   },
   destroyed() {
-    console.log("Destroyed!");
     this.$store.commit('CAMPAIGNS_WITH_REPORTS', {});
   },
   computed: {
