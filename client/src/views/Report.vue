@@ -4,10 +4,10 @@
     <div class="p3 flex report-row"
       v-for="campaign in Object.keys(campaigns)"
       :key="campaign">
-      <span class="block flex-auto">{{campaigns[campaign]}}</span>
-      <a :href="urljoin(API_URL, 'campaign', campaign, 'responses/file')"
+      <span class="block flex-auto">{{campaigns[campaign].name}}</span>
+      <a v-if="campaigns[campaign].responses" :href="urljoin(API_URL, 'campaign', campaign, 'responses/file')"
         class="button px1 mr1">Response Report</a>
-      <a :href="urljoin(API_URL, 'campaign', campaign, 'deliveries/file')"
+      <a v-if="campaigns[campaign].deliveries" :href="urljoin(API_URL, 'campaign', campaign, 'deliveries/file')"
         class="button px1">Delivery Report</a>
     </div>
     <h2 v-if="!campaigns">No campaigns to report on.

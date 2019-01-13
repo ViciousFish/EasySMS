@@ -84,17 +84,41 @@ const getCampaignsWithReports = async (req: Request, res: Response, next: any) =
         Delivery.find({ user_id: req.user })
     ]);
     const campaigns: {
-        [key:string]: string
+        [key:string]: {
+            id: string,
+            name: string,
+            responses: boolean,
+            deliveries: boolean
+        }
     } = {};
     if (responses){
         responses.forEach((response: IMessageResponse) => {
-            campaigns[response.campaign_id] = response.campaign_name;
+            if (!campaigns[response.campaign_id]){
+                campaigns[response.campaign_id] = {
+                    id: response.campaign_id,
+                    name: response.campaign_name,
+                    responses: true,
+                    deliveries: false
+                }
+            }
         });
     }
 
     if (deliveries){
         deliveries.forEach((delivery: IDelivery) => {
-            campaigns[delivery.campaign] = delivery.campaign_name;
+            if (!campaigns[delivery.campaign]){
+                campaigns[delivery.campaign] = {
+                    id: delivery.campaign,
+                    name: delivery.campaign_name,
+                    responses: false,
+                    deliveries: true
+                }
+            } else {
+                campaigns[delivery.campaign] = {
+                    ...campaigns[delivery.campaign],
+                    deliveries: true
+                }
+            }
         });
     }
 
