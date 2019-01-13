@@ -124,8 +124,9 @@ export default {
       editing: false,
       minuteplus: false,
       temp: {
-        text: "",
-        date: null
+        uuid: '',
+        text: '',
+        date: null,
       },
       hour: "0",
       minute: "0",
@@ -142,6 +143,7 @@ export default {
   },
   mounted() {
     if (this.message) {
+      this.temp.uuid = this.message.uuid;
       this.temp.text = this.message.text;
       this.temp.date = new Date(this.message.date);
     }
@@ -172,8 +174,20 @@ export default {
             campaign: this.campaignid
           });
           this.temp = {
-            text: "",
-            date: null
+            uuid: '',
+            text: '',
+            date: null,
+          };
+        } else {
+          this.temp.date.setHours(this.hour, this.minute);
+          this.$store.dispatch('updateMessage', {
+            campaignId: this.campaignid,
+            message: this.temp
+          });
+          this.temp = {
+            uuid: '',
+            text: '',
+            date: null,
           };
         }
       }

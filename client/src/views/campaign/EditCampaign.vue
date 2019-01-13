@@ -5,7 +5,7 @@
     <p>Schedule as many messages as you want to be sent now or in the future!</p>
     <div class="">
       <message v-for="message in campaign.messages"
-        :key="message.id"
+        :key="message.uuid"
         :message="message"
         :editable="campaign.status !== 'completed' && message.date > Date.now()"
         :campaignid="campaign.id" />
