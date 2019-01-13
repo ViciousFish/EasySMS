@@ -1,24 +1,30 @@
 <template>
   <div id="buttonContainer" class="flex flex-auto flex-column justify-center items-center">
     <h1>{{campaign.name}}</h1>
-    <div><div class="button" @click="sendCampaign">Send</div></div>
+    <div>
+      <div class="button back" @click="scheduleMessages">Back to Schedule Messages</div>
+      <div class="button send" @click="sendCampaign">Send</div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['id'],
+  props: ["id"],
   methods: {
-    async sendCampaign() {
-      await this.$store.dispatch('sendCampaign', { campaign: this.id });
-      this.$router.push('/');
+    scheduleMessages() {
+      this.$router.push(`/${this.id}/edit`);
     },
+    async sendCampaign() {
+      await this.$store.dispatch("sendCampaign", { campaign: this.id });
+      this.$router.push("/");
+    }
   },
   computed: {
     campaign() {
       return this.$store.getters.campaignById(this.id);
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -34,13 +40,13 @@ $color: #0a0;
   }
 }
 .button {
-  background: none;
   padding: 0.75em 2em;
+  margin: 0.75em 1em;
   text-align: center;
   text-decoration: none;
   color: $color;
   border: 2px solid $color;
-  font-size: 24px;
+  font-size: 20px;
   // display: block;
   border-radius: 0.3em;
   transition: all 0.2s ease-in-out;
@@ -48,7 +54,7 @@ $color: #0a0;
   overflow: hidden;
   &:before {
     content: "";
-    background-color: rgba(255,255,255,0.5);
+    background-color: rgba(255, 255, 255, 0.5);
     height: 100%;
     width: 3em;
     display: block;
@@ -64,9 +70,18 @@ $color: #0a0;
     border-bottom: 4px solid darken($color, 10%);
     &:before {
       transform: skewX(-45deg) translateX(13.5em);
-     transition: all 0.5s ease-in-out;
+      transition: all 0.5s ease-in-out;
     }
   }
 }
 
+.send {
+  background: #dddddd;
+}
+
+.back {
+  background: gray;
+  color: black;
+  border: 2px solid black;
+}
 </style>
