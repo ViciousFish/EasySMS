@@ -11,7 +11,10 @@
       <datepicker name="date"
         v-model="temp.date"
         input-class="p1 mr1"
-        placeholder="date to send"></datepicker>
+        placeholder="date to send"
+        :disabled-dates="disabledDates"
+        :highlighted="highlighted"
+        ></datepicker>
       <label class="ml1 mr1" for="hour">Hour</label>
       <select v-model="hour" name="hour">
         <option value="0" selected>0</option>
@@ -112,20 +115,22 @@
 </template>
 
 <script>
-import datepicker from 'vuejs-datepicker';
+import datepicker from "vuejs-datepicker";
 
 export default {
-  props: ['message', 'campaignid', 'editable'],
+  props: ["message", "campaignid", "editable"],
   data() {
     return {
       editing: false,
       minuteplus: false,
       temp: {
-        text: '',
-        date: null,
+        text: "",
+        date: null
       },
-      hour: '0',
-      minute: '0',
+      hour: "0",
+      minute: "0",
+      highlighted: null,
+      disabledDates: null
     };
   },
   computed: {
@@ -133,13 +138,24 @@ export default {
       const d = new Date(this.message.date);
       // return "" + d.toLocaleString() + d.toTimeString();
       return d.toLocaleString();
-    },
+    }
   },
   mounted() {
     if (this.message) {
       this.temp.text = this.message.text;
       this.temp.date = new Date(this.message.date);
     }
+
+    let yesterday = new Date();
+    yesterday.setDate(new Date().getDate() - 1);
+
+    this.highlighted = {
+      dates: [new Date()]
+    };
+
+    this.disabledDates = {
+      to: yesterday
+    };
   },
   methods: {
     edit() {
@@ -151,21 +167,21 @@ export default {
         this.editing = false;
         if (!this.message) {
           this.temp.date.setHours(this.hour, this.minute);
-          this.$store.dispatch('newMessage', {
+          this.$store.dispatch("newMessage", {
             message: this.temp,
-            campaign: this.campaignid,
+            campaign: this.campaignid
           });
           this.temp = {
-            text: '',
-            date: null,
+            text: "",
+            date: null
           };
         }
       }
-    },
+    }
   },
   components: {
-    datepicker,
-  },
+    datepicker
+  }
 };
 </script>
 
@@ -188,5 +204,8 @@ input {
   /* flex-basis: 100px; */
   flex: 0 0 auto !important;
   /* width: 100px; */
+}
+.current-date {
+  color: #00aaff;
 }
 </style>
