@@ -65,7 +65,7 @@ const deleteCampaign = async (req: Request, res: Response, next: any) => {
     const campaign: ICampaign = res.locals.campaign;
     campaign.messages.forEach(message => MessageScheduler.removeScheduledMessage(message.uuid));
 
-    await Campaign.deleteOne({ id: campaign.id });
+    await Campaign.deleteOne({ _id: campaign.id });
 
     res.status(202).send({});
 }
