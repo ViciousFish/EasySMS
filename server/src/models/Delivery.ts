@@ -6,6 +6,14 @@ const DeliverySchema: Schema = new Schema({
     required: true,
     ref: 'Campaign'
   },
+  campaign_name: {
+    type: String,
+    required: true
+  },
+  user_id: {
+    type: String,
+    required: true
+  },
   user: {
     type: String,
     required: true
@@ -34,19 +42,21 @@ const DeliverySchema: Schema = new Schema({
   }
 });
 
-DeliverySchema.query.getMostRecent = function (user_identifier: string): Promise<{ campaign: string, user: string, message: string, date: Date, status: string }> {
+DeliverySchema.query.getMostRecent = function (user_identifier: string): Promise<IDelivery> {
   return this.findOne({ user: user_identifier }).sort({ date: -1 }).limit(1);
 }
 
 export interface IDelivery extends Document {
   campaign: string,
+  campaign_name: string,
+  user_id: string,
   user: string,
   message: string,
   messageBody: string,
   date: Date,
   status: string,
 
-  getMostRecent(user_identifier: string): Promise<{ campaign: string, user: string, message: string, date: Date, status: string }>
+  getMostRecent(user_identifier: string): Promise<IDelivery>
 }
 export const Delivery: Model<IDelivery> = model<IDelivery>('Delivery', DeliverySchema);
 

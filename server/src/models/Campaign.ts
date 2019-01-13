@@ -1,19 +1,5 @@
 import mongoose, { Document, Schema, Model, model } from "mongoose";
 import uuid from 'uuid';
-const ResponseSchema: Schema = new Schema({
-  user: {
-    type: String,
-    required: true
-  },
-  text: {
-    type: String,
-    required: true
-  },
-  date: {
-    type: Number,
-    default: Date.now
-  }
-});
 
 export const MessageSchema: Schema = new Schema({
   uuid: {
@@ -30,9 +16,6 @@ export const MessageSchema: Schema = new Schema({
     required: true,
     default: Date.now
   },
-  responses: [{
-    type: ResponseSchema
-  }],
   status: {
     type: String,
     default: 'pending',
@@ -94,24 +77,6 @@ CampaignSchema.methods.toClient = function () {
 
   return result;
 }
-
-CampaignSchema.query.addMessageResponse = function (campaign_id: string, message_uuid: string, user_identifier: string, text: string) {
-  return this.findOneAndUpdate({ _id: campaign_id }, {
-    $push: {
-      'messages.responses': {
-        user: user_identifier,
-        text,
-        date: Date.now()
-      }
-    }
-  });
-}
-
-export interface IResponse {
-  user: string,
-  text: string,
-  date: number
-}
 export interface IUser {
   phone: string
 }
@@ -120,12 +85,7 @@ export interface IMessage {
   uuid: string,
   text: string,
   date: number,
-  status: 'pending' | 'started' | 'complete' | 'no-credentials' | 'needs-rescheduling',
-  responses: [{
-    user: string,
-    text: string,
-    date: number
-  }]
+  status: 'pending' | 'started' | 'complete' | 'no-credentials' | 'needs-rescheduling'
 }
 
 export interface ICampaign extends Document {
@@ -136,7 +96,6 @@ export interface ICampaign extends Document {
   date: Date,
   status: 'created' | 'in-progress' | 'completed',
 
-  addMessageResponse(campaign_id: string, message_uuid: string, user_identifier: string, text: string): any,
   toClient(): ICampaign;
 }
 

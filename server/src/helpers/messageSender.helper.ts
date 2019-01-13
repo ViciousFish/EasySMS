@@ -29,7 +29,9 @@ export async function startSendingMessage(campaign_id: string, message_id: strin
       twilioDispatcher.sendMessage(campaign, message, user.phone)
         .then(() => {
           const delivery = new Delivery({
-            campaign,
+            campaign: campaign.id,
+            campaign_name: campaign.name,
+            user_id: campaign.user_id,
             user: user.phone,
             message: message.uuid,
             messageBody: message.text,
@@ -80,7 +82,9 @@ export async function resumeSendingMessage(campaign_id: string, message_id: stri
         twilioDispatcher.sendMessage(campaign, message, user.phone)
           .then(() => {
             const delivery = new Delivery({
-              campaign,
+              campaign: campaign.id,
+              campaign_name: campaign.name,
+              user_id: campaign.user_id,
               user: user.phone,
               message: message.uuid,
               messageBody: message.text,

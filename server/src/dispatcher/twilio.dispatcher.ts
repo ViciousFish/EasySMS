@@ -26,6 +26,8 @@ export class TwilioDispatcher {
         .catch((error:any) => {
             const delivery = new Delivery({
                 campaign: campaign.id,
+                campaign_name: campaign.name,
+                user_id: campaign.user_id,
                 user: target_phone,
                 message: message.uuid,
                 messageBody: message.text,

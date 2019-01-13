@@ -25,6 +25,7 @@ axiosInstance.interceptors.response.use(null, ({ response }) => {
 
 export default new Vuex.Store({
   state: {
+    campaignsWithReports: {},
     campaignMap: {},
     messageMap: {},
     inputcsv: {},
@@ -52,6 +53,9 @@ export default new Vuex.Store({
     },
     RECEIVE_TWILIO_INFORMATION(state, twilioInformation) {
       Vue.set(state, 'twilioInformation', twilioInformation);
+    },
+    CAMPAIGNS_WITH_REPORTS(state, campaigns) {
+      Vue.set(state, 'campaignsWithReports', campaigns);
     },
     setAuthenticated(state, isAuthenticated) {
       state.authenticated = isAuthenticated; // eslint-disable-line
@@ -100,6 +104,12 @@ export default new Vuex.Store({
           return date1 < date2
         });
         context.commit('RECEIVE_CAMPAIGNS', campaigns);
+      }
+    },
+    async getCampaignsWithReports(context) {
+      const campaigns = (await axiosInstance.get('api/campaign/reports')).data;
+      if (campaigns) {
+        context.commit('CAMPAIGNS_WITH_REPORTS', campaigns);
       }
     },
     async sendCampaign(context, { campaign }) {

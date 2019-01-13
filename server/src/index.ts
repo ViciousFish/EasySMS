@@ -32,6 +32,7 @@ import { TwilioCredentialsRoutes } from './routes/twiliocredentials';
 import { TwilioCredentials } from './models/TwilioCredentials';
 import { secured } from './middleware/auth';
 import { checkTwilioCredentials } from './middleware/twilio';
+import { MessageResponse } from './models/MessageResponse';
 
 
 const MongoStore = require('connect-mongo')(session);
@@ -157,12 +158,16 @@ app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Resp
   .then(async (delivery) => {
     const campaign = await Campaign.findById(delivery.campaign);
     const index = await indexOfMessageSearch(campaign.messages, delivery.message);
-    campaign.messages[index].responses.push({
-      user: user_identifier,
+    const newResponse = new MessageResponse({
+      campaign_id: campaign.id,
+      campaign_name: campaign.name,
+      message_id: campaign.messages[index].uuid,
+      user_id: campaign.user_id,
       text: req.body.Body,
       date: Date.now()
     });
-    campaign.save();
+
+    newResponse.save();
     res.status(200).send();
   })
   .catch(error => {
@@ -183,8 +188,8 @@ try {
 
   app.use(checkTwilioCredentials);
 
-  CampaignRoutes(app);
   ReportsRoutes(app);
+  CampaignRoutes(app);
 
   app.use('/*', (req, res, next) => {
     res.status(200).sendFile(path.resolve(__dirname + '../../public/index.html'));
