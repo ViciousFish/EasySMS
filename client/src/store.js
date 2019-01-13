@@ -94,8 +94,11 @@ export default new Vuex.Store({
       // commit new campaign
     },
     async fetchCampaigns(context) {
-      const campaigns = (await axiosInstance.get('api/campaign')).data;
+      let campaigns = (await axiosInstance.get('api/campaign')).data;
       if (campaigns) {
+        campaigns = campaigns.sort(({ date: date1 }, { date: date2 }) => {
+          return date1 < date2
+        });
         context.commit('RECEIVE_CAMPAIGNS', campaigns);
       }
     },
@@ -125,9 +128,9 @@ export default new Vuex.Store({
       const twilioInformation = (response.status === 404) ? {
         exists: false,
       } : {
-        exists: true,
-        ...response.data,
-      };
+          exists: true,
+          ...response.data,
+        };
       context.commit('RECEIVE_TWILIO_INFORMATION', twilioInformation);
     },
     async submitTwilioCredentials(context, twilioInformation) {
