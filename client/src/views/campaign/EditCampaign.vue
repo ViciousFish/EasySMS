@@ -7,9 +7,9 @@
       <message v-for="message in campaign.messages"
         :key="message.id"
         :message="message"
-        :editable="campaign.status === 'created'"
+        :editable="campaign.status !== 'completed' && message.date > Date.now()"
         :campaignid="campaign.id" />
-      <message v-if="campaign.status === 'created'"
+      <message v-if="campaign.status !== 'completed'"
         key="0" :message="null"
         :campaignid="campaign.id" />
     </div>

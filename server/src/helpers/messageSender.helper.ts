@@ -48,6 +48,18 @@ export async function startSendingMessage(campaign_id: string, message_id: strin
   });
 
   campaign.messages[messageIndex].status = 'complete';
+
+  const campaignCompleted = campaign.messages.reduce((done, message) => {
+    if (done && message.status === 'complete'){
+      return true;
+    } else {
+      return false;
+    }
+  }, true);
+
+  if (campaignCompleted){
+    campaign.status = 'completed';
+  }
   campaign.save();
 }
 
@@ -102,6 +114,19 @@ export async function resumeSendingMessage(campaign_id: string, message_id: stri
   });
 
   campaign.messages[index].status = 'complete';
+
+  const campaignCompleted = campaign.messages.reduce((done, message) => {
+    if (done && message.status === 'complete'){
+      return true;
+    } else {
+      return false;
+    }
+  }, true);
+
+  if (campaignCompleted){
+    campaign.status = 'completed';
+  }
+  
   campaign.save();
 }
 
