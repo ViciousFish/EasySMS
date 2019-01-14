@@ -1,7 +1,7 @@
-import { Campaign, IMessage } from "../models/Campaign";
+import { Campaign, IMessage, ICampaign, IUser } from "../models/Campaign";
 import { Delivery, IDelivery } from "../models/Delivery";
 import { TwilioDispatcher } from "../dispatcher/twilio.dispatcher";
-import { TwilioCredentials } from '../models/TwilioCredentials';
+import { TwilioCredentials, ITwilioCredentials } from '../models/TwilioCredentials';
 
 export async function startSendingMessage(campaign_id: string, message_id: string): Promise<void> {
   const campaign = await Campaign.findById(campaign_id);
@@ -22,45 +22,8 @@ export async function startSendingMessage(campaign_id: string, message_id: strin
   }
   campaign.messages[messageIndex].status = 'started';
   await campaign.save();
-  const twilioDispatcher = new TwilioDispatcher(campaignTwilioCredentials);
-  campaign.users.map(user => {
-    if (user.phone) {
-      // Send message via phone dispatcher
-      twilioDispatcher.sendMessage(campaign, message, user.phone)
-        .then(() => {
-          const delivery = new Delivery({
-            campaign: campaign.id,
-            campaign_name: campaign.name,
-            user_id: campaign.user_id,
-            user: user.phone,
-            message: message.uuid,
-            messageBody: message.text,
-            date: new Date(),
-            status: 'Success',
-            from: campaignTwilioCredentials.phone
-          });
-          delivery.save();
-        })
-        .catch((err: any) => {
-          console.error("An error happened while sending a message", message);
-        });
-    }
-  });
-
-  campaign.messages[messageIndex].status = 'complete';
-
-  const campaignCompleted = campaign.messages.reduce((done, message) => {
-    if (done && message.status === 'complete'){
-      return true;
-    } else {
-      return false;
-    }
-  }, true);
-
-  if (campaignCompleted){
-    campaign.status = 'completed';
-  }
-  campaign.save();
+  
+  sendMessage(campaign, message, messageIndex, campaignTwilioCredentials, campaign.users);
 }
 
 export async function resumeSendingMessage(campaign_id: string, message_id: string): Promise<void> {
@@ -87,29 +50,36 @@ export async function resumeSendingMessage(campaign_id: string, message_id: stri
   }
   let message = messages[index];
 
+  const users = campaign.users.filter(user => {
+    return Object.keys(deliveries).indexOf(user.phone) === -1;
+  })
+
+  sendMessage(campaign, message, index, campaignTwilioCredentials, users);
+
+}
+
+async function sendMessage(campaign: ICampaign, message: IMessage, index: number, campaignTwilioCredentials: ITwilioCredentials, users: Array<IUser>){
   const twilioDispatcher = new TwilioDispatcher(campaignTwilioCredentials);
-  campaign.users.forEach(user => {
+  users.forEach(user => {
     if (user.phone) {
-      if (!deliveries[user.phone]) {
-        twilioDispatcher.sendMessage(campaign, message, user.phone)
-          .then(() => {
-            const delivery = new Delivery({
-              campaign: campaign.id,
-              campaign_name: campaign.name,
-              user_id: campaign.user_id,
-              user: user.phone,
-              message: message.uuid,
-              messageBody: message.text,
-              date: new Date(),
-              status: 'Success',
-              from: campaignTwilioCredentials.phone
-            });
-            delivery.save();
-          })
-          .catch((err: any) => {
-            console.error("An error happened while sending a message", message);
+      twilioDispatcher.sendMessage(campaign, message, user.phone)
+        .then(() => {
+          const delivery = new Delivery({
+            campaign: campaign.id,
+            campaign_name: campaign.name,
+            user_id: campaign.user_id,
+            user: user.phone,
+            message: message.uuid,
+            messageBody: message.text,
+            date: new Date(),
+            status: 'Success',
+            from: campaignTwilioCredentials.phone
           });
-      }
+          delivery.save();
+        })
+        .catch((err: any) => {
+          console.error("An error happened while sending a message", message);
+        });
     }
   });
 
@@ -126,7 +96,7 @@ export async function resumeSendingMessage(campaign_id: string, message_id: stri
   if (campaignCompleted){
     campaign.status = 'completed';
   }
-  
+
   campaign.save();
 }
 
