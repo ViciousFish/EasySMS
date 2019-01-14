@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { MessageScheduler } from '../helpers/messageScheduler.helper';
-import { Campaign, IUser, IMessage, ICampaign, IResponse } from '../models/Campaign';
+import { Campaign, IUser, IMessage, ICampaign } from '../models/Campaign';
 import { indexOfMessageSearch } from '../helpers/messageSender.helper';
 
 const routerPath = '/api/campaign';
@@ -118,8 +118,7 @@ const createMessage = async (req: Request, res: Response, next: any) => {
         text,
         uuid: undefined,
         date,
-        status: undefined,
-        responses: undefined
+        status: undefined
     };
 
 
