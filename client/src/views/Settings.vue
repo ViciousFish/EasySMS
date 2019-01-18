@@ -41,7 +41,7 @@
       <div class="form-group mt1">
         <input type="submit" class="button btn-success py1 px2 my1" value="Save">
       </div>
-      <transition name="fade">
+      <transition name="slide-fade">
         <p v-if="saved">Saved!</p>
       </transition>
     </form>
@@ -88,10 +88,15 @@ form {
   max-width: 560px;
 }
 
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
+.slide-fade-enter-active {
+  transition: all .3s ease;
 }
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+.slide-fade-leave-active {
+  transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active below version 2.1.8 */ {
+  transform: translateX(10px);
   opacity: 0;
 }
 </style>
