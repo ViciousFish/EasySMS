@@ -1,6 +1,7 @@
 <template>
   <div class="flex flex-column">
     <h1 class="m1">My Campaigns</h1>
+    <h2 class="m1">See the status of your campaigns, create new campaigns, or edit/delete existing ones</h2>
     <transition-group name="list" tag="div">
     <campaign class="p3"
       v-for="campaign in Object.values(campaigns)"

@@ -1,6 +1,7 @@
 <template>
   <div class="flex flex-column">
     <h1 class="m1">Download Reports</h1>
+    <h2 class="m1">Track delivery status and see replies</h2>
     <div class="p3 flex report-row"
       v-for="campaign in Object.keys(campaigns)"
       :key="campaign">
