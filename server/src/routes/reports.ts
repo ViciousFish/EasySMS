@@ -11,9 +11,11 @@ const getCampaignDeliveriesFile = async (req: Request, res: Response, next: any)
         user_id: req.user
     });
     deliveries = deliveries.map(delivery => {
-        const tmp = delivery.toObject();
-        delete tmp.__v;
-        return tmp;
+        delete delivery.user_id;
+        delete delivery.campaign;
+        delete delivery._id;
+        delete delivery.message;
+        return delivery;
     });
     if (deliveries == null || deliveries.length == 0) {
         res.status(404).send({ msg: "No deliveries to report!"});
@@ -56,7 +58,13 @@ const getCampaignResponsesFile = async (req: Request, res: Response, next: any) 
         res.status(404).send({ msg: "No responses to report!"})
         return;
     }
-    const items = responses;
+    const prunedResponses = responses.map(response => {
+        delete response.user_id;
+        delete response.message_id;
+        delete response.campaign_id;
+        return response;
+    })
+    const items = prunedResponses;
     const replacer = (key: string, value: any) => value === null ? '' : value // specify how you want to handle null values here
     const header = Object.keys(items[0])
     let csv = items.map((row: any) => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
