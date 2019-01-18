@@ -11,6 +11,7 @@ const getCampaignDeliveriesFile = async (req: Request, res: Response, next: any)
         user_id: req.user
     });
     deliveries = deliveries.map(delivery => {
+        delivery = delivery.toJSON();
         delete delivery.user_id;
         delete delivery.campaign;
         delete delivery._id;
@@ -59,6 +60,7 @@ const getCampaignResponsesFile = async (req: Request, res: Response, next: any) 
         return;
     }
     const prunedResponses = responses.map(response => {
+        response = response.toJSON();
         delete response.user_id;
         delete response.message_id;
         delete response.campaign_id;
