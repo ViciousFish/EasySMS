@@ -14,7 +14,7 @@
       <a v-if="campaigns[campaign].deliveries" :href="urljoin(API_URL, 'campaign', campaign, 'deliveries/file')"
         class="button px1">Delivery Report</a>
     </div>
-    <h2 v-if="!campaigns">No campaigns to report on.
+    <h2 v-if="!campaigns || Object.keys(campaigns).length === 0">No campaigns to report on.
       <router-link to="/">Click here to create one!</router-link>
     </h2>
   </div>
