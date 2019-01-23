@@ -153,6 +153,8 @@ app.post('/deliveryupdate', twilioWebhookMiddleware, (req: Request, res: Respons
 
 app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Response) => {
   const user_identifier = req.body.From;
+  console.log("Webhook - From", req.body.From);
+  console.log("Webhook - To", req.body.To);
   
   Delivery.findOne({ user: user_identifier, from: req.body.to }).sort({ date: -1 }).limit(1)
   .then(async (delivery) => {
