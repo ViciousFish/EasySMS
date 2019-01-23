@@ -144,11 +144,13 @@ export default new Vuex.Store({
       context.commit('RECEIVE_TWILIO_INFORMATION', twilioInformation);
     },
     async submitTwilioCredentials(context, twilioInformation) {
-      await axiosInstance.post('api/twiliocredentials', twilioInformation);
-      context.commit('setSavingCredentials', true);
-      setTimeout(() => {
-        context.commit('setSavingCredentials', false);
-      }, 2000);
+      const response = await axiosInstance.post('api/twiliocredentials', twilioInformation);
+      if (response.status === 201) {
+        context.commit('setSavingCredentials', true);
+        setTimeout(() => {
+          context.commit('setSavingCredentials', false);
+        }, 2000);
+      }
     },
     async login() {
       window.location = `${HOME_URL}login?returnTo=${window.location}`;
