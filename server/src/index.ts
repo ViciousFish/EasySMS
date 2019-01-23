@@ -153,8 +153,6 @@ app.post('/deliveryupdate', (req: Request, res: Response, next) => {
 
 app.post('/smsresponse', async (req: Request, res: Response) => {
   const user_identifier = req.body.From;
-  console.log("Webhook - From", req.body.From);
-  console.log("Webhook - To", req.body.to);
   
   Delivery.findOne({ user: user_identifier, from: req.body.To }).sort({ date: -1 }).limit(1)
   .then(async (delivery) => {

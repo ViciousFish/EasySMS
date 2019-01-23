@@ -16,6 +16,7 @@ const getCampaignDeliveriesFile = async (req: Request, res: Response, next: any)
         delete delivery.campaign;
         delete delivery._id;
         delete delivery.message;
+        delete delivery.__v;
         return delivery;
     });
     if (deliveries == null || deliveries.length == 0) {
@@ -64,6 +65,7 @@ const getCampaignResponsesFile = async (req: Request, res: Response, next: any) 
         delete response.user_id;
         delete response.message_id;
         delete response.campaign_id;
+        delete response.__v;
         return response;
     })
     const items = prunedResponses;
