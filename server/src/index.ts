@@ -144,14 +144,14 @@ app.get('/logout', (req, res) => {
 });
 
 // In local mode, we don't want to enforce this
-const twilioWebhookMiddleware = process.env.RUN_MODE === 'local' ? (_: any, __: any, next: any) => { next() } : twilio.webhook();
+// const twilioWebhookMiddleware = process.env.RUN_MODE === 'local' ? (_: any, __: any, next: any) => { next() } : twilio.webhook();
 
 // TODO: create twilio delivery status update handler
-app.post('/deliveryupdate', twilioWebhookMiddleware, (req: Request, res: Response, next) => {
+app.post('/deliveryupdate', (req: Request, res: Response, next) => {
   res.status(200).send();
 });
 
-app.post('/smsresponse', twilioWebhookMiddleware, async (req: Request, res: Response) => {
+app.post('/smsresponse', async (req: Request, res: Response) => {
   const user_identifier = req.body.From;
   console.log("Webhook - From", req.body.From);
   console.log("Webhook - To", req.body.To);
