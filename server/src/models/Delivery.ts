@@ -55,6 +55,7 @@ export interface IDelivery extends Document {
   messageBody: string,
   date: Date,
   status: string,
+  from: string
 
   getMostRecent(user_identifier: string): Promise<IDelivery>
 }
