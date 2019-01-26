@@ -76,11 +76,7 @@ export default new Vuex.Store({
         }
         return null;
       }, null);
-      const { messages } = state.campaignMap[campaignId];
-      if (foundIndex !== null) {
-        messages[foundIndex] = message;
-      }
-      Vue.set(state.campaignMap[campaignId], 'messages', messages);
+      Vue.set(state.campaignMap[campaignId].messages, foundIndex, message);
       Vue.set(state.messageMap, message.uuid, message);
     },
   },
