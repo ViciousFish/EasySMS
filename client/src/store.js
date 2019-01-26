@@ -46,10 +46,14 @@ export default new Vuex.Store({
       state.campaignMap = {}; // eslint-disable-line
       campaigns.forEach((campaign) => {
         Vue.set(state.campaignMap, campaign.id, campaign);
+        campaign.messages.forEach((message) => {
+          Vue.set(state.messageMap, message.uuid, message);
+        });
       });
     },
     RECEIVE_NEW_MESSAGE(state, { campaign, message }) {
       state.campaignMap[campaign].messages.push(message);
+      Vue.set(state.messageMap, message.uuid, message);
     },
     RECEIVE_TWILIO_INFORMATION(state, twilioInformation) {
       Vue.set(state, 'twilioInformation', twilioInformation);
@@ -62,6 +66,18 @@ export default new Vuex.Store({
     },
     setSavingCredentials(state, isSaving) {
       state.savedCredentials = isSaving; // eslint-disable-line
+    },
+    UPDATE_MESSAGE(state, { message, campaignId }) {
+      const foundIndex = state.campaignMap[campaignId].messages.reduce((index, m, currentIndex) => {
+        if (index) {
+          return index;
+        } else if (m.uuid === message.uuid) {
+          return currentIndex;
+        }
+        return null;
+      }, null);
+      Vue.set(state.campaignMap[campaignId].messages, foundIndex, message);
+      Vue.set(state.messageMap, message.uuid, message);
     },
   },
   getters: {
@@ -132,6 +148,19 @@ export default new Vuex.Store({
       const newMessage = (await axiosInstance.post(urljoin(`api/campaign/${campaign}/message`), payload)).data;
       context.commit('RECEIVE_NEW_MESSAGE', { message: newMessage, campaign });
       return newMessage;
+    },
+    async updateMessage(context, { message, campaignId }) {
+      const payload = {
+        text: message.text,
+        date: message.date.getTime(),
+        campaignId,
+      };
+
+      const updatedMessage = (await axiosInstance.put(urljoin(`api/campaign/${campaignId}/message/${message.uuid}`), payload)).data;
+      context.commit('UPDATE_MESSAGE', {
+        message: updatedMessage,
+        campaignId,
+      });
     },
     async fetchTwilio(context) {
       const response = (await axiosInstance.get('api/twiliocredentials'));
