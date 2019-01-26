@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <nav v-if="authenticated">
-      <router-link to="/">Campaigns</router-link>
+      <router-link to="/" exact>Campaigns</router-link>
       <router-link to="/report">Reports</router-link>
       <router-link to="/settings">Settings</router-link>
       <a v-on:click="logout">Logout</a>
